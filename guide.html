@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Как не надо — посты TTS</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%272%27 fill=%27%230D0D0D%27/%3E%3Cpath d=%27M16 10c6 0 11 6 11 6s-5 6-11 6S5 16 5 16s5-6 11-6Z%27 fill=%27%23D6D6D2%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%273%27 fill=%27%230D0D0D%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="guide-page">
+<header class="app-head">
+  <span class="logo" id="appLogo"></span>
+  <h1>Как не надо</h1>
+  <span class="spacer"></span>
+  <a class="btn btn-primary btn-sm" href="index.html">К конструктору</a>
+</header>
+
+<main class="guide">
+  <section class="g-intro">
+    <p class="g-kicker">Справочник для тех, кто собирает посты</p>
+    <h2 class="g-h">Как не перегрузить пост и не сломать стиль</h2>
+    <p class="g-lead">Картинку в ленте смотрят мельком и на маленьком экране. На ней — название, одна строка о главном и когда-где.
+      Всё остальное — в текст поста. Конструктор держит большую часть правил сам; ниже — что ломает пост, если делать вручную или обходить подсказки.</p>
+    <ol class="g-rules">
+      <li><b>Одна мысль на картинку.</b> Если хочется добавить ещё строку — ей место в тексте поста.</li>
+      <li><b>Всё, что не читается с телефона, — лишнее.</b> На телефоне картинка уменьшается втрое.</li>
+      <li><b>Серия важнее одного поста.</b> В профиле посты стоят рядом — один стиль, одна тема, один шаблон на серию.</li>
+    </ol>
+    <nav class="g-toc" id="toc" aria-label="Разделы"></nav>
+  </section>
+  <div id="guideList"></div>
+
+  <section class="g-section g-standard" id="standard">
+    <h3 class="g-title">Стандарт, который держит конструктор</h3>
+    <table class="g-table">
+      <tr><th>Холст</th><td>1080 × 1350 (4:5) для постов, 1080 × 1920 для сторис. Квадрат 1:1 — только в расширенном интерфейсе: в сетке Instagram он теряет по 135 px с боков.</td></tr>
+      <tr><th>Сетка</th><td>6 колонок, поля 72 px, промежуток 24 px. Подводка — не шире 5 колонок.</td></tr>
+      <tr><th>Поля сторис</th><td>262 px сверху и 250 px снизу — под интерфейс и строку ответа.</td></tr>
+      <tr><th>Шрифты</th><td>Название — Cormorant Garamond 500, обычным регистром. Текст — Manrope. Числа крупно (новая дата, даты подборки) — Oranienbaum.</td></tr>
+      <tr><th>Размеры</th><td>Название 118 px и не больше двух строк. Подводка и данные — 34 px, подписи капсом — 28 px. Мельче на холсте ничего нет: на телефоне 28 px превращаются примерно в 9.</td></tr>
+      <tr><th>Цвет</th><td>Кобальт — только у активной палочки слайдов. Надзаголовок и подписи — серые. Метки статуса — по смыслу: зелёная, оранжевая, красная.</td></tr>
+      <tr><th>Свечение</th><td>Цвет — по жанру: театр и классика — синий, опера — тёплый, мюзикл — зелёный. С картинкой — «Тихо», у переноса и отмены свечения нет.</td></tr>
+      <tr><th>Картинка</th><td>Не меньше 30 % высоты холста и не меньше 1080 px по ширине исходника. Уступает место тексту, а не наоборот.</td></tr>
+      <tr><th>Типограф</th><td>Тире вместо дефиса, кавычки «ёлочки», короткие слова не висят в конце строки, «29 апреля» и «3 000 ₽» не разрываются.</td></tr>
+    </table>
+  </section>
+</main>
+
+<div class="measure" id="measure" aria-hidden="true"></div>
+
+<script src="js/logo.js"></script>
+<script src="js/core.js"></script>
+<script src="js/poster.js"></script>
+<script src="js/content.js"></script>
+<script src="js/previews.js"></script>
+<script src="js/guide.js"></script>
+</body>
+</html>
