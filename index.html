@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Конструктор постов TTS</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%272%27 fill=%27%230D0D0D%27/%3E%3Cpath d=%27M16 10c6 0 11 6 11 6s-5 6-11 6S5 16 5 16s5-6 11-6Z%27 fill=%27%23D6D6D2%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%273%27 fill=%27%230D0D0D%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="app-head">
+  <span class="logo" id="appLogo"></span>
+  <h1>Конструктор постов</h1>
+  <span class="spacer"></span>
+  <button class="btn btn-ghost" type="button" id="resetBtn">Сбросить</button>
+</header>
+
+<main class="app">
+  <aside class="panel" aria-label="Настройки поста">
+
+    <section class="sec">
+      <h2 class="sec-title">Шаблон</h2>
+      <div class="chips" data-chips="template">
+        <button class="chip" type="button" data-value="frame">Картинка в поле</button>
+        <button class="chip" type="button" data-value="band">Картинка полосой</button>
+        <button class="chip" type="button" data-value="cover">Альбом · обложка</button>
+        <button class="chip" type="button" data-value="details">Альбом · детали</button>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2 class="sec-title">Формат и цвет</h2>
+      <div class="field"><span class="label">Формат</span>
+        <div class="chips" data-chips="format">
+          <button class="chip" type="button" data-value="post">4:5 · пост</button>
+          <button class="chip" type="button" data-value="square">1:1</button>
+          <button class="chip" type="button" data-value="story">9:16 · сторис</button>
+        </div>
+      </div>
+      <div class="field"><span class="label">Тема</span>
+        <div class="chips" data-chips="theme">
+          <button class="chip" type="button" data-value="light">Светлая</button>
+          <button class="chip" type="button" data-value="dark">Тёмная</button>
+        </div>
+      </div>
+      <div class="field"><span class="label">Блобы</span>
+        <div class="chips" data-chips="genre">
+          <button class="chip" type="button" data-value="cool">Синий</button>
+          <button class="chip" type="button" data-value="warm">Тёплый + синий</button>
+          <button class="chip" type="button" data-value="green">Зелёный + синий</button>
+        </div>
+      </div>
+      <div class="field"><span class="label">Сила блобов</span>
+        <div class="chips" data-chips="blobLevel">
+          <button class="chip" type="button" data-value="none">Нет</button>
+          <button class="chip" type="button" data-value="soft">Тихо</button>
+          <button class="chip" type="button" data-value="full">Ярко</button>
+        </div>
+        <p class="hint">«Тихо»: на слайдах с картинкой один блоб в углу под текстом, на слайде деталей — оба, приглушённо.</p>
+      </div>
+    </section>
+
+    <section class="sec" data-show="frame band cover">
+      <h2 class="sec-title">Картинка</h2>
+      <div class="field">
+        <input type="file" id="imageFile" accept="image/*" hidden>
+        <div class="btns">
+          <button class="btn btn-ghost" type="button" id="imageBtn">Загрузить</button>
+          <button class="btn btn-ghost" type="button" id="imageReset">Пример</button>
+        </div>
+      </div>
+      <div class="field"><label class="label" for="imgX">Фокус по горизонтали</label>
+        <div class="range"><input type="range" id="imgX" min="0" max="100" step="1" data-bind="image.x" data-num><output data-out="image.x"></output></div></div>
+      <div class="field"><label class="label" for="imgY">Фокус по вертикали</label>
+        <div class="range"><input type="range" id="imgY" min="0" max="100" step="1" data-bind="image.y" data-num><output data-out="image.y"></output></div></div>
+      <div class="field"><label class="label" for="imgZoom">Масштаб</label>
+        <div class="range"><input type="range" id="imgZoom" min="1" max="2.5" step="0.05" data-bind="image.zoom" data-num><output data-out="image.zoom"></output></div></div>
+      <div class="field" data-show="band cover"><label class="label" for="imgSize">Высота картинки, % холста</label>
+        <div class="range"><input type="range" id="imgSize" min="35" max="75" step="1" data-bind="imageSize" data-num><output data-out="imageSize"></output></div></div>
+      <div class="field" data-show="band"><span class="label">Логотип на картинке</span>
+        <div class="chips" data-chips="logoTone">
+          <button class="chip" type="button" data-value="dark">Тёмный</button>
+          <button class="chip" type="button" data-value="light">Светлый</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2 class="sec-title">Тексты</h2>
+      <div class="field" data-show="frame band details"><label class="label" for="eyebrow">Надзаголовок</label>
+        <input class="input" id="eyebrow" data-bind="eyebrow"></div>
+      <div class="field"><label class="label" for="title">Название</label>
+        <input class="input" id="title" data-bind="title"></div>
+      <div class="field"><label class="label" for="titleSize">Размер названия, px</label>
+        <div class="range"><input type="range" id="titleSize" min="72" max="160" step="2" data-bind="titleSize" data-num><output data-out="titleSize"></output></div></div>
+      <div class="field"><label class="check"><input type="checkbox" data-bind="titleCaps"> Название капсом</label>
+        <p class="hint">По правилам 14.3 названия событий пишутся обычным регистром. Капс — только по решению владельца.</p></div>
+      <div class="field" data-show="frame band"><label class="label" for="lead">Подводка</label>
+        <textarea class="textarea" id="lead" data-bind="lead"></textarea></div>
+      <div class="field" data-show="cover"><label class="label" for="subline">Строка под названием</label>
+        <input class="input" id="subline" data-bind="subline"></div>
+      <div class="field" data-show="details"><label class="label" for="detailsLead">Абзац о событии</label>
+        <textarea class="textarea" id="detailsLead" data-bind="detailsLead" rows="5"></textarea></div>
+      <div class="row">
+        <div class="field"><label class="label" for="age">Возраст</label>
+          <input class="input" id="age" data-bind="age" placeholder="12+"></div>
+        <div class="field"><label class="label" for="slides">Палочки слайдов</label>
+          <select class="select" id="slides" data-bind="slides">
+            <option value="0">Нет</option>
+            <option value="1/2">1 из 2</option>
+            <option value="2/2">2 из 2</option>
+            <option value="1/3">1 из 3</option>
+            <option value="2/3">2 из 3</option>
+            <option value="3/3">3 из 3</option>
+          </select></div>
+      </div>
+    </section>
+
+    <section class="sec" data-show="frame band">
+      <h2 class="sec-title">Строка данных</h2>
+      <div class="field"><span class="label">Колонок</span>
+        <div class="chips" data-chips="infoCount">
+          <button class="chip" type="button" data-value="2">2</button>
+          <button class="chip" type="button" data-value="3">3</button>
+        </div>
+      </div>
+      <div id="infoList"></div>
+    </section>
+
+    <section class="sec" data-show="details">
+      <h2 class="sec-title">Таблица</h2>
+      <div id="rowsList"></div>
+      <button class="btn btn-ghost btn-full" type="button" id="addRow">Добавить строку</button>
+    </section>
+
+    <section class="sec">
+      <h2 class="sec-title">Экспорт</h2>
+      <div class="field"><span class="label">Размер файла</span>
+        <div class="chips" data-chips="exportScale">
+          <button class="chip" type="button" data-value="1">1× · 1080 px</button>
+          <button class="chip" type="button" data-value="2">2× · 2160 px</button>
+        </div>
+      </div>
+      <div class="field"><label class="label" for="jpegQ">Качество JPEG</label>
+        <div class="range"><input type="range" id="jpegQ" min="0.6" max="1" step="0.02" data-bind="jpegQuality" data-num><output data-out="jpegQuality"></output></div></div>
+      <div class="btns">
+        <button class="btn btn-primary" type="button" data-export="png">Скачать PNG</button>
+        <button class="btn btn-primary" type="button" data-export="jpeg">Скачать JPEG</button>
+      </div>
+      <div class="field" style="margin-top:8px">
+        <button class="btn btn-ghost btn-full" type="button" id="exportAlbum">Альбом: обложка + детали (JPEG)</button>
+      </div>
+      <p class="hint">Альбом собирается из тех же данных: обложка с палочкой 1 из 2, детали — 2 из 2.</p>
+    </section>
+
+    <section class="sec">
+      <h2 class="sec-title">Текст поста для Telegram</h2>
+      <div class="field"><label class="label" for="cHook">Крючок</label>
+        <input class="input" id="cHook" data-bind="caption.hook"></div>
+      <div class="field"><label class="label" for="cBody">О чём</label>
+        <textarea class="textarea" id="cBody" data-bind="caption.body" rows="5"></textarea></div>
+      <div class="row">
+        <div class="field"><label class="label" for="cDate">Дата</label><input class="input" id="cDate" data-bind="caption.date"></div>
+        <div class="field"><label class="label" for="cTime">Время</label><input class="input" id="cTime" data-bind="caption.time"></div>
+      </div>
+      <div class="field"><label class="label" for="cVenue">Площадка</label><input class="input" id="cVenue" data-bind="caption.venue"></div>
+      <div class="row">
+        <div class="field"><label class="label" for="cLink">Ссылка</label><input class="input" id="cLink" data-bind="caption.link" placeholder="https://"></div>
+        <div class="field"><label class="label" for="cPrice">Цена от, ₽</label><input class="input" id="cPrice" data-bind="caption.price"></div>
+      </div>
+      <div class="field"><label class="label" for="cWhy">Почему сейчас</label>
+        <textarea class="textarea" id="cWhy" data-bind="caption.why" rows="2"></textarea></div>
+      <div class="field"><span class="label">Готовый текст</span>
+        <pre class="caption-out" id="captionOut"></pre>
+        <span class="count" id="captionCount"></span>
+      </div>
+      <button class="btn btn-primary btn-full" type="button" id="copyCaption">Скопировать текст</button>
+    </section>
+  </aside>
+
+  <section class="preview" aria-label="Предпросмотр">
+    <div class="stage" id="stage"><div class="stage-inner" id="stageInner"></div></div>
+    <div class="preview-meta" id="previewMeta"></div>
+  </section>
+</main>
+
+<div class="offscreen" id="offscreen" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/html-to-image.js"></script>
+<script src="logo.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
