@@ -90,22 +90,22 @@
     <section class="sec">
       <h2 class="sec-title">Тексты</h2>
       <div class="field" data-show="frame band details"><label class="label" for="eyebrow">Надзаголовок</label>
-        <input class="input" id="eyebrow" data-bind="eyebrow"></div>
+        <input class="input" id="eyebrow" data-bind="eyebrow" maxlength="40"></div>
       <div class="field"><label class="label" for="title">Название</label>
-        <input class="input" id="title" data-bind="title"></div>
+        <input class="input" id="title" data-bind="title" maxlength="60"></div>
       <div class="field"><label class="label" for="titleSize">Размер названия, px</label>
         <div class="range"><input type="range" id="titleSize" min="72" max="160" step="2" data-bind="titleSize" data-num><output data-out="titleSize"></output></div></div>
       <div class="field"><label class="check"><input type="checkbox" data-bind="titleCaps"> Название капсом</label>
         <p class="hint">По правилам 14.3 названия событий пишутся обычным регистром. Капс — только по решению владельца.</p></div>
       <div class="field" data-show="frame band"><label class="label" for="lead">Подводка</label>
-        <textarea class="textarea" id="lead" data-bind="lead"></textarea></div>
+        <textarea class="textarea" id="lead" data-bind="lead" maxlength="220"></textarea></div>
       <div class="field" data-show="cover"><label class="label" for="subline">Строка под названием</label>
-        <input class="input" id="subline" data-bind="subline"></div>
+        <input class="input" id="subline" data-bind="subline" maxlength="90"></div>
       <div class="field" data-show="details"><label class="label" for="detailsLead">Абзац о событии</label>
-        <textarea class="textarea" id="detailsLead" data-bind="detailsLead" rows="5"></textarea></div>
+        <textarea class="textarea" id="detailsLead" data-bind="detailsLead" rows="5" maxlength="360"></textarea></div>
       <div class="row">
         <div class="field"><label class="label" for="age">Возраст</label>
-          <input class="input" id="age" data-bind="age" placeholder="12+"></div>
+          <input class="input" id="age" data-bind="age" placeholder="12+" maxlength="4"></div>
         <div class="field"><label class="label" for="slides">Палочки слайдов</label>
           <select class="select" id="slides" data-bind="slides">
             <option value="0">Нет</option>
@@ -122,6 +122,7 @@
       <h2 class="sec-title">Строка данных</h2>
       <div class="field"><span class="label">Колонок</span>
         <div class="chips" data-chips="infoCount">
+          <button class="chip" type="button" data-value="0">Нет</button>
           <button class="chip" type="button" data-value="2">2</button>
           <button class="chip" type="button" data-value="3">3</button>
         </div>
@@ -181,6 +182,7 @@
   </aside>
 
   <section class="preview" aria-label="Предпросмотр">
+    <p class="fit-note" id="fitNote" role="status" aria-live="polite"></p>
     <div class="stage" id="stage"><div class="stage-inner" id="stageInner"></div></div>
     <div class="preview-meta" id="previewMeta"></div>
   </section>
