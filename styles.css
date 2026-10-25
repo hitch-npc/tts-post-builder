@@ -123,6 +123,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .list-item .field { margin-bottom: 8px; }
 .list-item .row > .field { margin-bottom: 8px; }
 .list-item-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.item-img { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.item-img img { width: 40px; height: 50px; object-fit: cover; border-radius: var(--r-sm); background: var(--n800); }
 .link-btn { background: none; border: 0; padding: 0; color: var(--n500); font-size: 11px; cursor: pointer; text-decoration: underline; }
 .link-btn:hover { color: var(--n100); }
 
@@ -156,8 +158,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .stage { width: 100%; max-width: 780px; position: relative; }
 .stage-inner, .guides { transform-origin: top left; position: absolute; top: 0; left: 0; }
 .stage-inner { box-shadow: 0 18px 50px var(--shadow-color); }
-.stage .p-img { cursor: grab; touch-action: none; }
-.stage .p-img.dragging { cursor: grabbing; }
+.stage .smm-img { cursor: grab; touch-action: none; }
+.stage .smm-img.dragging { cursor: grabbing; }
 .guides { pointer-events: none; width: 1080px; }
 .g-box { position: relative; width: 1080px; }
 .g-margin { position: absolute; outline: 2px dashed #0047FF99; }
@@ -275,96 +277,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
-/* ═══ Холст поста (рендерится в PNG/JPEG). Размеры — шкала smm.tokens.json: 118 / 40 / 34 / 28 ═══ */
-.poster {
-  --p-bg: #F2F1EB; --p-fg: #0D0D0D; --p-muted: #4A4A48; --p-label: #6A6A68; --p-line: #A8A8A5;
-  --p-blue: #BFD0EE; --p-genre: #E5DAEF; --p-bar-off: #0D0D0D33; --p-accent: #0047FF;
-  --p-tag-g-bg: #DCFCE7; --p-tag-g-fg: #16A34A; --p-tag-g-bd: #86EFAC;
-  --p-tag-o-bg: #FFEDD5; --p-tag-o-fg: #C2410C; --p-tag-o-bd: #FED7AA;
-  --p-tag-r-bg: #FEE2E2; --p-tag-r-fg: #DC2626; --p-tag-r-bd: #FCA5A5;
-  position: relative; overflow: hidden; width: 1080px; background: var(--p-bg); color: var(--p-fg);
-  font-family: 'Manrope', system-ui, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-  display: flex; flex-direction: column; box-sizing: border-box;
-}
-.poster[data-theme="dark"] {
-  --p-bg: #0D0D0D; --p-fg: #D6D6D2; --p-muted: #A6A6A2; --p-label: #7A7A78; --p-line: #262930;
-  --p-blue: #06277F; --p-genre: #15092A; --p-bar-off: #D6D6D24D;
-  --p-tag-g-bg: #0A2210; --p-tag-g-fg: #4ADE80; --p-tag-g-bd: #1A4428;
-  --p-tag-o-bg: #221408; --p-tag-o-fg: #FB923C; --p-tag-o-bd: #442810;
-  --p-tag-r-bg: #220A0A; --p-tag-r-fg: #F87171; --p-tag-r-bd: #441414;
-}
-.poster[data-genre="warm"] { --p-genre: #F2D5B0; }
-.poster[data-genre="green"] { --p-genre: #C7E8C8; }
-.poster[data-theme="dark"][data-genre="warm"] { --p-genre: #4A1F00; }
-.poster[data-theme="dark"][data-genre="green"] { --p-genre: #0A2A0A; }
-
-/* свечение внутри текстовой панели под картинкой: гаснет раньше верхнего края панели */
-.poster { --p-blue-s: #BFD0EE99; --p-genre-s: #E5DAEF99; --p-blue-f: #BFD0EEE6; --p-genre-f: #E5DAEFB3; }
-.poster[data-genre="warm"] { --p-genre-s: #F2D5B0B3; --p-genre-f: #F2D5B0E6; }
-.poster[data-genre="green"] { --p-genre-s: #C7E8C8B3; --p-genre-f: #C7E8C8E6; }
-.poster[data-theme="dark"] { --p-blue-s: #06277FB3; --p-genre-s: #15092AB3; --p-blue-f: #06277F; --p-genre-f: #15092AE6; }
-.poster[data-theme="dark"][data-genre="warm"] { --p-genre-s: #4A1F00CC; --p-genre-f: #4A1F00; }
-.poster[data-theme="dark"][data-genre="green"] { --p-genre-s: #0A2A0ACC; --p-genre-f: #0A2A0A; }
-.p-panel.glow-soft-blue  { background: radial-gradient(ellipse 58% 85% at 100% 100%, var(--p-blue-s) 0%, transparent 72%); }
-.p-panel.glow-soft-genre { background: radial-gradient(ellipse 58% 85% at 100% 100%, var(--p-genre-s) 0%, transparent 72%); }
-.p-panel.glow-full {
-  background: radial-gradient(ellipse 62% 90% at 100% 100%, var(--p-blue-f) 0%, transparent 72%),
-              radial-gradient(ellipse 55% 85% at 0% 100%, var(--p-genre-f) 0%, transparent 72%);
-}
-
-.p-blob { position: absolute; border-radius: 9999px; pointer-events: none; z-index: 0; }
-.p-blob-blue { background: radial-gradient(circle at 50% 50%, var(--p-blue) 0%, transparent 62%); }
-.p-blob-genre { background: radial-gradient(circle at 50% 50%, var(--p-genre) 0%, transparent 62%); }
-.poster[data-genre="cool"] .p-blob-genre { opacity: .6; }
-.poster > :not(.p-blob) { position: relative; z-index: 1; }
-
-.p-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: 24px; }
-.p-head { align-items: center; }
-.p-logo { grid-column: 1 / 3; width: 232px; color: var(--p-fg); }
-.p-logo svg { display: block; width: 100%; height: auto; }
-.p-meta { grid-column: 4 / 7; justify-self: end; display: flex; align-items: center; gap: 32px; }
-.p-age { font-size: 28px; font-weight: 600; letter-spacing: .14em; color: var(--p-muted); }
-.p-bars { display: flex; gap: 14px; }
-.p-bar { width: 58px; height: 4px; border-radius: 2px; background: var(--p-bar-off); }
-.p-bar.on { background: var(--p-accent); }
-
-.p-kicker { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
-.p-eyebrow { font-size: 28px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--p-muted); }
-.p-tag {
-  display: inline-flex; align-items: center; font-size: 26px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
-  padding: 10px 18px; border-radius: 2px; border: 2px solid; line-height: 1.1; white-space: nowrap;
-}
-.p-tag-g { background: var(--p-tag-g-bg); color: var(--p-tag-g-fg); border-color: var(--p-tag-g-bd); }
-.p-tag-o { background: var(--p-tag-o-bg); color: var(--p-tag-o-fg); border-color: var(--p-tag-o-bd); }
-.p-tag-r { background: var(--p-tag-r-bg); color: var(--p-tag-r-fg); border-color: var(--p-tag-r-bd); }
-.p-title { margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; line-height: 1; overflow-wrap: anywhere; text-wrap: balance; }
-.p-title.caps { text-transform: uppercase; letter-spacing: .02em; }
-.p-lead { margin-top: 22px; font-size: 34px; font-weight: 500; line-height: 1.4; color: var(--p-muted); text-wrap: pretty; }
-.p-info { border-top: 2px solid var(--p-line); padding-top: 26px; }
-.p-info-cell { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.p-label { font-size: 28px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--p-label); }
-.p-val { font-size: 34px; font-weight: 500; line-height: 1.3; }
-.p-val span { color: var(--p-muted); }
-.p-num { font-family: 'Oranienbaum', 'Manrope', serif; font-weight: 400; }
-
-.p-img { position: relative; overflow: hidden; background: var(--p-line); }
-.p-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-
-/* таблица деталей, перенос */
-.p-rowline { grid-column: 1 / -1; height: 2px; background: var(--p-line); }
-.p-row-label { grid-column: 1 / 3; padding: 24px 0; font-size: 28px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--p-label); line-height: 1.55; }
-.p-row-val { grid-column: 3 / 7; padding: 24px 0; font-size: 34px; font-weight: 500; line-height: 1.3; text-wrap: pretty; }
-.p-row-val span { color: var(--p-muted); }
-.p-row-val .p-num { font-size: 76px; line-height: 1; color: var(--p-fg); display: inline-block; margin-bottom: 10px; }
-.p-was { color: var(--p-muted); text-decoration: line-through; text-decoration-thickness: 2px; }
-
-/* подборка */
-.p-dg-when { grid-column: 1 / 3; padding: 26px 0; display: flex; flex-direction: column; gap: 6px; }
-.p-dg-when .p-num { font-size: 48px; line-height: 1; }
-.p-dg-when .p-label { font-size: 28px; }
-.p-dg-what { grid-column: 3 / 7; padding: 26px 0; min-width: 0; }
-.p-dg-title { font-family: 'Cormorant Garamond', serif; font-weight: 500; line-height: 1.05; text-wrap: balance; }
-.p-dg-meta { margin-top: 10px; font-size: 34px; font-weight: 500; line-height: 1.3; color: var(--p-muted); }
+/* Холст поста — классы SMM-слоя дизайн-системы, ds/ds-smm.css */
 
 /* ═══ Справочник «Как не надо» ═══ */
 .guide { max-width: 960px; margin: 0 auto; padding: 32px 24px 96px; }

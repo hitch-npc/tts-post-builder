@@ -1,15 +1,15 @@
-/* Конструктор постов TTS — холст поста: из состояния собирается «спека», из спеки — разметка слайда.
-   Вёрстка держит поля всегда: картинка уступает место тексту (не меньше 30 % высоты),
-   название уменьшается до двух строк и до попадания в поля, а если не помогло — выгрузка блокируется. */
+/* Конструктор постов TTS — холст поста на классах SMM-слоя дизайн-системы (ds/ds-smm.css, решение №34).
+   Из состояния собирается «спека», из спеки — разметка слайда. Вёрстка держит поля всегда: картинка уступает
+   место тексту (не меньше 30 % высоты), название уменьшается до двух строк и до попадания в поля,
+   а если не помогло — выгрузка закрывается. */
 (function () {
   'use strict';
   var T = window.TTS;
   var esc = T.esc, br = T.br, fmt = T.fmt;
 
-  var MIN_IMAGE = 0.3;
-  var LEAD_MAX = 776;          // 5 колонок из 6 — длина строки подводки
-  var TITLE_AUTO = 118;        // --smm-fs-display
-  var TITLE_AUTO_MIN = 80;
+  // Кегль названия по шкале smm.tokens.json
+  var BASE = { frame: 118, band: 118, cover: 118, details: 102, change: 94, digest: 94, type: 150 };
+  var NB = ' ';
 
   /* ── спека: всё, что нужно холсту, уже посчитано и выверено ── */
   // env.src(ref) → адрес картинки; env.tone(spec) → 'dark' | 'light' для логотипа на картинке
@@ -19,81 +19,79 @@
     var ty = a.typograph === false ? function (s) { return s || ''; } : T.typo;
     var e = state.event, f = state.format;
     if (simple && f === 'square') f = 'post';
-    var F = T.FORMATS[f];
     var type = state.type;
-    var service = type === 'change';
-    var blobLevel = a.blobLevel === 'auto' ? (service ? 'none' : 'soft') : a.blobLevel;
-    var blob = a.blobColor === 'auto' ? (T.GENRES[state.genre] || T.GENRES.other).blob : a.blobColor;
+    var layout = type === 'change' ? 'change' : type === 'digest' ? 'digest' : state.layout;
+    var wide = a.margins !== 'tight';
+    var X = wide ? T.MARGINS.wide : T.MARGINS.tight;
+    var story = f === 'story';
     var price = fmt.price(e.price);
+    var when = fmt.dayMonth(e.date) + (e.time ? ', ' + e.time : '');
 
     var s = {
-      type: type, format: f, H: F.h, pt: F.padTop, pb: F.padBottom,
-      theme: state.theme, blob: blob, blobLevel: blobLevel,
-      layout: type === 'change' ? 'change' : type === 'digest' ? 'digest' : state.layout,
+      type: type, layout: layout, format: f, H: T.FORMATS[f].h,
+      x: X, pt: story ? T.STORY_PAD.top : X, pb: story ? T.STORY_PAD.bottom : X, wide: wide,
+      theme: state.theme, hue: (T.GENRES[state.genre] || T.GENRES.other).hue,
       kind: ty(e.kind), title: ty(e.title), caps: !!a.titleCaps,
       titleSize: a.titleSize || 0,
-      lead: ty(e.lead), age: e.age || '',
+      line: [when, ty(e.venue)].filter(Boolean).join(' · '),
+      age: e.age || '',
       image: { src: env && env.src ? env.src(e.image.ref) : '', x: e.image.x, y: e.image.y, zoom: e.image.zoom, ref: e.image.ref },
       imageSize: a.imageSize, logoTone: a.logoTone,
-      slides: [], manualBars: a.slides
+      manualBars: a.slides, manualFx: a.fx
     };
-    if (type === 'status') s.tag = { text: T.STATUSES[state.status].name, tone: T.STATUSES[state.status].tag };
-    if (type === 'change') s.tag = { text: T.CHANGES[state.change.kind].name, tone: T.CHANGES[state.change.kind].tag };
+    if (type === 'status') s.mark = T.STATUSES[state.status].name;
+    if (type === 'change') s.mark = T.CHANGES[state.change.kind].name;
 
-    // строка данных под подводкой
-    var autoInfo = [
-      { label: 'Когда', a: fmt.short(e.date), b: e.time ? 'начало в ' + e.time : '' },
-      { label: 'Где', a: ty(e.venue), b: ty(e.city) },
-      { label: 'Билеты', a: price ? 'от ' + price + ' ₽' : 'в продаже', b: 'без комиссии' }
-    ];
-    var info = a.customInfo || autoInfo;
-    s.info = info.slice(0, a.infoCount);
-
-    // таблица на слайде деталей
+    // слайд деталей альбома: одна фраза и пункты в одну строку
     var autoRows = [
-      { label: 'Когда', a: fmt.longDow(e.date), b: e.time ? 'Начало в ' + e.time : '' },
-      { label: 'Где', a: ty(e.venue), b: ty(e.city) },
-      { label: 'Билеты', a: price ? 'От ' + price + ' ₽' : 'В продаже', b: 'Без комиссии, с выбором мест' }
+      { label: 'Когда', a: fmt.short(e.date) + (e.time ? ' · ' + e.time : '') },
+      { label: 'Где', a: ty(e.venue) },
+      { label: 'Билеты', a: price ? 'от ' + price + NB + '₽, без комиссии' : 'Без комиссии' }
     ];
-    s.rows = (a.customRows || autoRows).map(function (r) { return { label: r.label, a: ty(r.a), b: ty(r.b) }; });
-    s.subline = ty(a.subline) || [fmt.short(e.date), ty(e.venue)].filter(Boolean).join(' · ');
-    s.detailsLead = ty(a.detailsLead) || s.lead;
+    s.rows = (a.customRows || autoRows).map(function (r) { return { label: r.label, a: ty(r.a) }; });
+    s.subline = ty(a.subline) || s.line;
+    s.detailsLead = ty(a.detailsLead || e.lead);
 
     if (type === 'change') {
       var c = state.change, move = c.kind === 'move';
       s.change = {
         move: move,
-        oldWhen: [fmt.short(e.date), e.time].filter(Boolean).join(' · '),
         newDay: fmt.dayMonth(c.date),
-        newRest: [fmt.dowFull(c.date), c.time ? 'начало в ' + c.time : ''].filter(Boolean).join(', '),
-        venueChanged: move && !!c.venue && c.venue !== e.venue,
-        venue: ty(move && c.venue ? c.venue : e.venue), city: ty(e.city),
+        sub: [c.time, ty(move && c.venue ? c.venue : e.venue), e.date ? 'вместо ' + fmt.dayMonth(e.date) : ''].filter(Boolean).join(' · '),
+        was: when, venue: ty(e.venue),
         note: ty(c.note || T.CHANGES[c.kind].note)
       };
     }
     if (type === 'digest') {
       var d = state.digest;
-      s.kind = ty(d.kind); s.title = ty(d.title); s.age = '';
+      s.title = ty(d.title); s.age = '';
       s.items = d.items.map(function (it) {
-        var p = fmt.price(it.price);
+        var im = it.image && it.image.ref ? it.image : null;
         return {
-          title: ty(it.title), day: fmt.dayMonth(it.date),
-          when: [fmt.dow(it.date), it.time].filter(Boolean).join(', '),
-          meta: [ty(it.venue), p ? 'от ' + p + ' ₽' : ''].filter(Boolean).join(' · ')
+          title: ty(it.title), day: fmt.dayMonth(it.date), time: it.time || '', venue: ty(it.venue),
+          img: im ? { src: env && env.src ? env.src(im.ref) : '', x: im.x, y: im.y } : null
         };
       });
+      // превью — когда картинка есть у каждого события и событий не больше четырёх: иначе пустые клетки и тесно
+      s.thumbs = s.items.length <= 4 && s.items.every(function (i) { return i.img; });
     }
 
-    // слайды
-    if (s.layout === 'album') {
-      s.slides = [{ kind: 'cover', bars: '1/2' }, { kind: 'details', bars: '2/2' }];
+    // свечение: «Рампа» с картинкой, выбранное — без картинки, у служебных постов и подборки — нет
+    function autoFx(kind) {
+      if (kind === 'type') return state.glow || 'depth';
+      if (kind === 'details') return 'depth';
+      if (kind === 'frame' || kind === 'band' || kind === 'cover') return 'footlight';
+      return 'none';
+    }
+    function fxFor(kind) { return s.manualFx && s.manualFx !== 'auto' ? s.manualFx : autoFx(kind); }
+
+    if (layout === 'album') {
+      s.slides = [{ kind: 'cover', bars: '1/2', fx: fxFor('cover') }, { kind: 'details', bars: '2/2', fx: fxFor('details') }];
     } else {
       var bars = s.manualBars && s.manualBars !== 'auto' && s.manualBars !== '0' ? s.manualBars : '';
-      s.slides = [{ kind: s.layout, bars: bars }];
+      s.slides = [{ kind: layout, bars: bars, fx: fxFor(layout) }];
     }
-    if (s.layout === 'band' || s.layout === 'album') {
-      s.tone = s.logoTone !== 'auto' ? s.logoTone : (env && env.tone ? env.tone(s) : 'dark');
-    }
+    if (layout === 'band') s.tone = s.logoTone !== 'auto' ? s.logoTone : (env && env.tone ? env.tone(s) : 'dark');
     return s;
   };
 
@@ -104,166 +102,95 @@
   // Только глаз из логотипа — для круглых аватаров в превью площадок
   T.logoMark = function () { return logo().replace('viewBox="0 0 676 194"', 'viewBox="-40 -65 321 321"'); };
 
-  function barsHtml(v) {
+  function bars(v) {
     if (!v) return '';
     var p = v.split('/'), active = +p[0], total = +p[1], out = '';
-    for (var i = 1; i <= total; i++) out += '<span class="p-bar' + (i === active ? ' on' : '') + '"></span>';
-    return '<span class="p-bars">' + out + '</span>';
+    for (var i = 1; i <= total; i++) out += '<span class="smm-dot' + (i === active ? ' smm-dot--active' : '') + '"></span>';
+    return '<span class="smm-dots">' + out + '</span>';
   }
-  function head(s, bars) {
-    var age = s.age ? '<span class="p-age">' + esc(s.age) + '</span>' : '';
-    return '<div class="p-grid p-head">' +
-      '<span class="p-logo">' + logo() + '</span>' +
-      '<div class="p-meta">' + age + barsHtml(bars) + '</div></div>';
+  function head(s, b) {
+    var age = s.age ? '<span class="smm-age">' + esc(s.age) + '</span>' : '';
+    return '<div class="smm-head"><span class="smm-logo">' + logo() + '</span><div class="smm-meta">' + age + bars(b) + '</div></div>';
   }
-  function img(s, style) {
+  function fx(name) { return name && name !== 'none' ? '<div class="smm-fx smm-fx--' + name + '"></div>' : ''; }
+  function img(s) {
     var i = s.image, pos = i.x + '% ' + i.y + '%';
-    return '<div class="p-img" data-drag="event" style="' + style + '"><img src="' + esc(i.src) + '" alt="" style="object-position:' + pos +
+    return '<div class="smm-img" data-drag="event"><img src="' + esc(i.src) + '" alt="" style="object-position:' + pos +
       ';transform:scale(' + i.zoom + ');transform-origin:' + pos + '"></div>';
   }
-  function tag(s) {
-    return s.tag ? '<span class="p-tag p-tag-' + s.tag.tone + '">' + esc(s.tag.text) + '</span>' : '';
+  function kicker(s) {
+    if (s.mark) return '<span class="smm-mark">' + esc(s.mark) + '</span>';
+    return s.kind ? '<span class="smm-eyebrow">' + esc(s.kind) + '</span>' : '';
   }
-  function kicker(s, style) {
-    if (!s.tag && !s.kind) return '';
-    return '<div class="p-kicker"' + (style ? ' style="' + style + '"' : '') + '>' + tag(s) +
-      (s.kind ? '<span class="p-eyebrow">' + esc(s.kind) + '</span>' : '') + '</div>';
+  function title(s, size, extra) {
+    return '<h2 class="smm-title' + (extra || '') + (s.caps ? ' smm-title--caps' : '') + '" data-title style="font-size:' + size + 'px">' + esc(s.title) + '</h2>';
   }
-  function title(s, size, marginTop) {
-    var st = 'font-size:' + size + 'px' + (marginTop ? ';margin-top:' + marginTop + 'px' : '');
-    return '<h1 class="p-title' + (s.caps ? ' caps' : '') + '" data-title style="' + st + '">' + esc(s.title) + '</h1>';
-  }
-  function textBlock(s, size) {
-    var k = kicker(s);
-    return k + title(s, size, k ? 20 : 0) +
-      (s.lead ? '<div class="p-lead" style="max-width:' + LEAD_MAX + 'px">' + br(s.lead) + '</div>' : '');
-  }
-  function info(s) {
-    var n = s.info.length;
-    if (!n) return '';
-    var span = 6 / n, cells = '';
-    s.info.forEach(function (c) {
-      cells += '<div class="p-info-cell" style="grid-column:span ' + span + '"><div class="p-label">' + esc(c.label) + '</div>' +
-        '<div class="p-val">' + esc(c.a) + (c.b ? '<br><span>' + esc(c.b) + '</span>' : '') + '</div></div>';
-    });
-    return '<div class="p-grid p-info">' + cells + '</div>';
-  }
-  // Свечение на фоне холста — для слайдов, где текст стоит на фоне
-  function blobs(s, kind) {
-    if (s.blobLevel === 'none') return '';
-    if (s.blobLevel === 'soft' && kind === 'frame') {
-      var cls = s.blob === 'cool' ? 'p-blob-blue' : 'p-blob-genre';
-      return '<div class="p-blob ' + cls + '" style="right:-340px;bottom:-400px;width:900px;height:900px;opacity:.55"></div>';
-    }
-    var pos = {
-      frame:   ['right:-300px;bottom:-340px', 'left:-320px;bottom:-260px'],
-      details: ['right:-380px;top:-420px',    'left:-320px;bottom:-260px']
-    }[kind];
-    var op = s.blobLevel === 'soft' ? ';opacity:.7' : '';
-    return '<div class="p-blob p-blob-blue" style="' + pos[0] + ';width:1100px;height:1100px' + op + '"></div>' +
-           '<div class="p-blob p-blob-genre" style="' + pos[1] + ';width:900px;height:900px' + op + '"></div>';
-  }
-  // Свечение внутри текстовой панели под картинкой: гаснет раньше верхнего края панели
-  function panelGlow(s) {
-    if (s.blobLevel === 'none') return '';
-    if (s.blobLevel === 'soft') return s.blob === 'cool' ? ' glow-soft-blue' : ' glow-soft-genre';
-    return ' glow-full';
-  }
-  function rowsHtml(rows) {
-    return rows.map(function (r) {
-      return '<div class="p-rowline"></div>' +
-        '<div class="p-row-label">' + esc(r.label) + '</div>' +
-        '<div class="p-row-val' + (r.cls ? ' ' + r.cls : '') + '">' + (r.html || esc(r.a) + (r.b ? '<br><span>' + esc(r.b) + '</span>' : '')) + '</div>';
-    }).join('');
-  }
-  function attrs(s) {
-    return 'class="poster" data-theme="' + s.theme + '" data-genre="' + s.blob + '" data-format="' + s.format + '"';
+  function line(text) { return text ? '<p class="smm-line">' + esc(text) + '</p>' : ''; }
+  function canvasClass(s, layout) {
+    return ['smm-canvas', 'smm-canvas--' + s.format, s.theme === 'light' ? 'smm-canvas--light' : '',
+      s.hue !== 'cool' ? 'smm-canvas--' + s.hue : '', s.wide ? '' : 'smm-canvas--tight', layout].filter(Boolean).join(' ');
   }
 
   /* ── слайды ── */
-  // size — кегль названия после подгонки; data-limit — нижняя граница, за которую не должен выходить элемент
+  // size — кегль основного макета (118 по шкале); у остальных макетов кегль меняется в той же пропорции.
+  // data-limit — нижняя граница, за которую не должен выходить элемент.
   T.renderSlide = function (s, i, size) {
     var sl = s.slides[i] || s.slides[0];
-    var H = s.H, pt = s.pt, pb = s.pb, X = T.SIDE, body;
-    var minImg = Math.round(H * MIN_IMAGE);
-    size = size || s.titleSize || TITLE_AUTO;
+    var H = s.H, k = sl.kind, lim = H - s.pb;
+    var ts = Math.round((size || BASE.frame) * BASE[k] / BASE.frame);
 
-    if (sl.kind === 'frame') {
-      var hasInfo = s.info.length > 0;
-      body = blobs(s, 'frame') +
-        head(s, sl.bars) +
-        img(s, 'flex:1 1 0;min-height:' + minImg + 'px;margin-top:40px') +
-        '<div style="flex:0 0 auto;margin-top:56px"' + (hasInfo ? '' : ' data-limit="' + (H - pb) + '"') + '>' + textBlock(s, size) + '</div>' +
-        (hasInfo ? '<div style="flex:0 0 auto;margin-top:44px" data-limit="' + (H - pb) + '">' + info(s) + '</div>' : '');
-      return '<div ' + attrs(s) + ' style="height:' + H + 'px;padding:' + pt + 'px ' + X + 'px ' + pb + 'px">' + body + '</div>';
+    if (k === 'frame') {
+      return '<div class="' + canvasClass(s, 'smm-frame') + '">' + fx(sl.fx) + head(s, sl.bars) + img(s) +
+        '<div class="smm-text" data-limit="' + lim + '">' + kicker(s) + title(s, ts) + line(s.subline) + '</div></div>';
     }
-
-    if (sl.kind === 'band') {
-      var ih = Math.max(minImg, Math.round(H * s.imageSize / 100));
-      var light = s.tone === 'light';
-      var tone = light ? '#D6D6D2' : '#0D0D0D';
-      var scrim = light ? '#0D0D0D' : '#F2F1EB';
-      body =
-        img(s, 'flex:0 1 ' + ih + 'px;min-height:' + minImg + 'px') +
-        // мягкая подложка под шапкой, чтобы логотип читался на любой картинке
-        '<div aria-hidden="true" style="position:absolute;top:0;left:0;right:0;height:' + (pt + 170) + 'px;z-index:1;background:linear-gradient(180deg,' + scrim + '73 0%,' + scrim + '00 100%)"></div>' +
-        '<div style="position:absolute;top:' + pt + 'px;left:' + X + 'px;right:' + X + 'px;z-index:2;--p-fg:' + tone + ';--p-muted:' + tone + ';--p-bar-off:' + tone + '4D">' + head(s, sl.bars) + '</div>' +
-        '<div class="p-panel' + panelGlow(s) + '" style="flex:1 0 auto;display:flex;flex-direction:column;justify-content:space-between;padding:64px ' + X + 'px ' + pb + 'px" data-limit="' + H + '">' +
-          '<div>' + textBlock(s, size) + '</div>' +
-          (s.info.length ? '<div style="margin-top:44px">' + info(s) + '</div>' : '') +
-        '</div>';
-      return '<div ' + attrs(s) + ' style="height:' + H + 'px">' + body + '</div>';
+    if (k === 'band') {
+      var tone = s.tone === 'light' ? 'smm-band--on-dark' : 'smm-band--on-light';
+      return '<div class="' + canvasClass(s, 'smm-band ' + tone) + '" style="--smm-img-h:' + s.imageSize + '%">' + img(s) +
+        '<div class="smm-scrim"></div>' + head(s, sl.bars) +
+        '<div class="smm-panel" data-limit="' + H + '">' + fx(sl.fx) +
+          '<div class="smm-text">' + kicker(s) + title(s, ts) + line(s.subline) + '</div></div></div>';
     }
-
-    if (sl.kind === 'cover') {
-      var ch = Math.max(minImg, Math.round(H * s.imageSize / 100));
-      body =
-        img(s, 'flex:0 1 ' + ch + 'px;min-height:' + minImg + 'px') +
-        '<div class="p-panel' + panelGlow(s) + '" style="flex:1 0 auto;display:flex;flex-direction:column;justify-content:space-between;padding:56px ' + X + 'px ' + pb + 'px" data-limit="' + H + '">' +
-          head(s, sl.bars) +
-          '<div style="margin-top:40px">' + (s.tag ? '<div class="p-kicker">' + tag(s) + '</div>' : '') +
-            title(s, size, s.tag ? 20 : 0) +
-            (s.subline ? '<div class="p-lead" style="margin-top:18px;max-width:' + LEAD_MAX + 'px">' + esc(s.subline) + '</div>' : '') +
-          '</div>' +
-        '</div>';
-      return '<div ' + attrs(s) + ' style="height:' + H + 'px">' + body + '</div>';
+    if (k === 'cover') {
+      return '<div class="' + canvasClass(s, 'smm-cover') + '" style="--smm-img-h:' + s.imageSize + '%">' + img(s) +
+        '<div class="smm-panel" data-limit="' + H + '">' + fx(sl.fx) + head(s, sl.bars) +
+          '<div class="smm-text">' + (s.mark ? '<span class="smm-mark">' + esc(s.mark) + '</span>' : '') + title(s, ts) + line(s.subline) + '</div></div></div>';
     }
-
-    var content = '';
-    if (sl.kind === 'details') {
-      content = kicker(s, 'grid-column:1/-1') +
-        '<div style="grid-column:1/-1">' + title(s, Math.round(size * 0.87), s.kind || s.tag ? 20 : 0) + '</div>' +
-        (s.detailsLead ? '<div class="p-lead" style="grid-column:1/6;margin-top:28px">' + br(s.detailsLead) + '</div>' : '') +
-        '<div style="grid-column:1/-1;height:48px"></div>' + rowsHtml(s.rows);
-    } else if (sl.kind === 'change') {
-      var c = s.change, rows = [];
-      if (c.move) {
-        rows.push({ label: 'Новая дата', html: '<span class="p-num">' + esc(c.newDay) + '</span>' + (c.newRest ? '<br><span>' + esc(c.newRest) + '</span>' : '') });
-        rows.push({ label: 'Было', a: c.oldWhen, cls: 'p-was' });
-        rows.push({ label: c.venueChanged ? 'Новое место' : 'Где', a: c.venue, b: c.city });
-      } else {
-        rows.push({ label: 'Дата', a: c.oldWhen, cls: 'p-was' });
-        rows.push({ label: 'Где', a: c.venue, b: c.city });
-      }
-      rows.push({ label: 'Билеты', a: c.note });
-      content = kicker(s, 'grid-column:1/-1') +
-        '<div style="grid-column:1/-1">' + title(s, Math.round(size * 0.8), 20) + '</div>' +
-        '<div style="grid-column:1/-1;height:56px"></div>' + rowsHtml(rows);
-    } else if (sl.kind === 'digest') {
-      var it = Math.max(40, Math.min(52, Math.round(size * 0.44)));
-      content = kicker(s, 'grid-column:1/-1') +
-        '<div style="grid-column:1/-1">' + title(s, Math.round(size * 0.75), s.kind ? 20 : 0) + '</div>' +
-        '<div style="grid-column:1/-1;height:48px"></div>' +
-        s.items.map(function (x) {
-          return '<div class="p-rowline"></div>' +
-            '<div class="p-dg-when"><span class="p-num">' + esc(x.day) + '</span><span class="p-label">' + esc(x.when) + '</span></div>' +
-            '<div class="p-dg-what"><div class="p-dg-title" style="font-size:' + it + 'px">' + esc(x.title) + '</div>' +
-            (x.meta ? '<div class="p-dg-meta">' + esc(x.meta) + '</div>' : '') + '</div>';
-        }).join('');
+    if (k === 'details') {
+      var rows = s.rows.map(function (r) {
+        return '<div class="smm-rule"></div><div class="smm-row-label">' + esc(r.label) + '</div><div class="smm-row-val">' + esc(r.a) + '</div>';
+      }).join('');
+      return '<div class="' + canvasClass(s, 'smm-sheet') + '">' + fx(sl.fx) + head(s, sl.bars) +
+        '<div class="smm-grid" data-limit="' + lim + '">' + title(s, ts, ' smm-span') +
+          (s.detailsLead ? '<p class="smm-lead">' + br(s.detailsLead) + '</p>' : '') +
+          '<div class="smm-gap"></div>' + rows + '</div></div>';
     }
-    body = blobs(s, 'details') + head(s, sl.bars) +
-      '<div class="p-grid" style="margin-top:56px" data-limit="' + (H - pb) + '">' + content + '</div>';
-    return '<div ' + attrs(s) + ' style="height:' + H + 'px;padding:' + pt + 'px ' + X + 'px ' + pb + 'px;justify-content:space-between">' + body + '</div>';
+    if (k === 'change') {
+      var c = s.change;
+      var body = c.move
+        ? '<div class="smm-big">' + esc(c.newDay) + '</div>' + (c.sub ? '<p class="smm-sub">' + esc(c.sub) + '</p>' : '')
+        : '<p class="smm-line"><span class="smm-was">' + esc(c.was) + '</span>' + (c.venue ? ' · ' + esc(c.venue) : '') + '</p>';
+      return '<div class="' + canvasClass(s, 'smm-sheet') + '">' + fx(sl.fx) + head(s, sl.bars) +
+        '<div class="smm-text" data-limit="' + lim + '"><span class="smm-mark">' + esc(s.mark) + '</span>' + title(s, ts) + body +
+          (c.note ? '<p class="smm-note">' + esc(c.note) + '</p>' : '') + '</div></div>';
+    }
+    if (k === 'digest') {
+      var items = s.items.map(function (it) {
+        var thumb = '';
+        if (s.thumbs) {
+          thumb = it.img ? '<div class="smm-dg-thumb"><img src="' + esc(it.img.src) + '" alt="" style="object-position:' + it.img.x + '% ' + it.img.y + '%"></div>'
+            : '<div class="smm-dg-thumb"></div>';
+        }
+        return '<div class="smm-rule"></div>' + thumb +
+          '<div class="smm-dg-when"><span class="smm-num">' + esc(it.day) + '</span>' + (it.time ? '<span class="smm-label">' + esc(it.time) + '</span>' : '') + '</div>' +
+          '<div class="smm-dg-what"><div class="smm-dg-title">' + esc(it.title) + '</div>' + (it.venue ? '<div class="smm-dg-meta">' + esc(it.venue) + '</div>' : '') + '</div>';
+      }).join('');
+      return '<div class="' + canvasClass(s, 'smm-sheet') + '">' + fx(sl.fx) + head(s, sl.bars) +
+        '<div class="smm-grid' + (s.thumbs ? ' smm-dg-thumbs' : '') + '" data-limit="' + lim + '">' + title(s, ts, ' smm-span') +
+          '<div class="smm-gap"></div>' + items + '</div></div>';
+    }
+    // type — без картинки, крупное название на свечении
+    return '<div class="' + canvasClass(s, 'smm-sheet smm-type') + '">' + fx(sl.fx) + head(s, sl.bars) +
+      '<div class="smm-text" data-limit="' + lim + '">' + kicker(s) + title(s, ts) + line(s.subline) + '</div></div>';
   };
 
   /* ── подгонка ── */
@@ -280,12 +207,14 @@
     var t = poster.querySelector('[data-title]');
     if (!t) return 0;
     var fs = parseFloat(t.style.fontSize) || 100;
-    return Math.round(t.offsetHeight / fs);
+    return Math.round(t.offsetHeight / (fs * (parseFloat(getComputedStyle(t).lineHeight) / fs || 1)));
   }
-  // Рендер одного слайда с подгонкой названия. Возвращает кегль, вылет за поля и число строк названия.
+  // Рендер одного слайда с подгонкой названия. Возвращает кегль (по шкале основного макета), вылет и число строк.
   T.layout = function (s, i, host, scale) {
-    var start = s.titleSize || TITLE_AUTO;
-    var min = s.titleSize ? Math.max(72, Math.round(start * 0.8)) : TITLE_AUTO_MIN;
+    var kind = (s.slides[i] || s.slides[0]).kind;
+    var start = s.titleSize || BASE.frame;
+    // без картинки название крупнее и может уменьшаться сильнее, оставаясь крупным
+    var min = Math.max(kind === 'type' ? 64 : 72, Math.round(start * (kind === 'type' ? 0.55 : 0.68)));
     var size = start, over, lines;
     for (;;) {
       host.innerHTML = T.renderSlide(s, i, size);
@@ -295,19 +224,10 @@
       if ((!over && lines <= 2) || size <= min) break;
       size = Math.max(min, size - 4);
     }
-    return { size: size, start: start, over: over, lines: lines };
-  };
-  // Подгонка всех слайдов поста. Кегль названия на альбоме общий — по самому тесному слайду.
-  T.layoutAll = function (s, host, scale) {
-    var res = s.slides.map(function (_, i) { return T.layout(s, i, host, scale); });
-    return {
-      slides: res,
-      over: Math.max.apply(null, res.map(function (r) { return r.over; })),
-      size: Math.min.apply(null, res.map(function (r) { return r.size; })),
-      start: res[0].start,
-      lines: Math.max.apply(null, res.map(function (r) { return r.lines; }))
-    };
+    var px = function (v) { return Math.round(v * BASE[kind] / BASE.frame); };
+    return { size: size, start: start, over: over, lines: lines, px: px(size), startPx: px(start) };
   };
 
-  T.MIN_IMAGE = MIN_IMAGE;
+  T.BASE = BASE;
+  T.MIN_IMAGE = 0.3;
 })();

@@ -3,32 +3,33 @@
   'use strict';
   var T = window.TTS = window.TTS || {};
 
-  // Поля: 72 по бокам (сетка 6 колонок, промежуток 24). Сторис: сверху 112 + 150 из smm.tokens.json,
-  // снизу 250 — под строку ответа.
+  // Холсты и поля — из SMM-слоя дизайн-системы (smm.tokens.json, решение №34):
+  // поле 112 (узкое 72 — в расширенном интерфейсе), сторис — 262 сверху и 250 снизу.
   T.FORMATS = {
-    post:   { h: 1350, name: '4:5',  label: 'Пост 4:5', padTop: 72,  padBottom: 72 },
-    square: { h: 1080, name: '1:1',  label: '1:1',      padTop: 64,  padBottom: 64 },
-    story:  { h: 1920, name: '9:16', label: 'Сторис 9:16', padTop: 262, padBottom: 250 }
+    post:   { h: 1350, name: '4:5',  label: 'Пост 4:5' },
+    square: { h: 1080, name: '1:1',  label: '1:1' },
+    story:  { h: 1920, name: '9:16', label: 'Сторис 9:16' }
   };
-  T.SIDE = 72;
+  T.MARGINS = { wide: 112, tight: 72 };
+  T.STORY_PAD = { top: 262, bottom: 250 };
 
-  // Блоб = жанр (CLAUDE.md, принцип 4): классика и театр — синий, опера — тёплый, мюзикл — зелёный
+  // Свечение одним цветом жанра: театр и классика — синий, опера — тёплый, мюзикл — зелёный
   T.GENRES = {
-    theatre: { name: 'Театр',    blob: 'cool' },
-    classic: { name: 'Классика', blob: 'cool' },
-    opera:   { name: 'Опера',    blob: 'warm' },
-    musical: { name: 'Мюзикл',   blob: 'green' },
-    other:   { name: 'Другое',   blob: 'cool' }
+    theatre: { name: 'Театр',    hue: 'cool' },
+    classic: { name: 'Классика', hue: 'cool' },
+    opera:   { name: 'Опера',    hue: 'warm' },
+    musical: { name: 'Мюзикл',   hue: 'green' },
+    other:   { name: 'Другое',   hue: 'cool' }
   };
-  // Теги — цвет по смыслу (правило 14.3): зелёный, оранжевый, красный
+  // Метка статуса — инверсия, без цветных тегов
   T.STATUSES = {
-    start: { name: 'Старт продаж',     tag: 'g', why: 'Билеты только поступили в продажу — лучшие места по стартовой цене разбирают первыми.' },
-    few:   { name: 'Мало мест',        tag: 'o', why: 'Мест осталось немного — если планировали пойти, лучше не откладывать.' },
-    last:  { name: 'Последние билеты', tag: 'r', why: 'Это последние билеты на этот вечер.' }
+    start: { name: 'Старт продаж',     why: 'Билеты только поступили в продажу — лучшие места по стартовой цене разбирают первыми.' },
+    few:   { name: 'Мало мест',        why: 'Мест осталось немного — если планировали пойти, лучше не откладывать.' },
+    last:  { name: 'Последние билеты', why: 'Это последние билеты на этот вечер.' }
   };
   T.CHANGES = {
-    move:   { name: 'Перенос', tag: 'o', note: 'Купленные билеты действуют на новую дату. Если она не подходит, билеты можно вернуть.' },
-    cancel: { name: 'Отмена',  tag: 'r', note: 'Билеты можно вернуть: деньги придут на карту, с которой оплачивали.' }
+    move:   { name: 'Перенос', note: 'Купленные билеты действуют на новую дату. Если она не подходит, билеты можно вернуть.' },
+    cancel: { name: 'Отмена',  note: 'Билеты можно вернуть: деньги придут на карту, с которой оплачивали.' }
   };
   T.TYPES = {
     announce: 'Анонс',
@@ -36,18 +37,19 @@
     change: 'Перенос или отмена',
     digest: 'Подборка'
   };
-  T.LAYOUTS = { frame: 'Картинка в поле', band: 'Картинка полосой', album: 'Альбом из 2' };
+  T.LAYOUTS = { frame: 'Картинка в поле', band: 'Картинка полосой', album: 'Альбом из 2', type: 'Без картинки' };
+  // Рисунок свечения: «Рампа» — для постов с картинкой, остальные — для постов без картинки
+  T.FX = { none: 'Нет', footlight: 'Рампа', beam: 'Луч', depth: 'Глубина', halo: 'Ореол' };
+  T.GLOWS = { beam: 'Луч', depth: 'Глубина', halo: 'Ореол' };
 
   // Настройки «Расширенного» режима. В «Простом» всегда действуют эти значения — так держится стандарт.
   T.ADV_DEFAULTS = {
-    titleSize: 0,            // 0 — авто: 118 (smm display), не больше двух строк
+    titleSize: 0,            // 0 — авто по шкале SMM, название не больше двух строк
     titleCaps: false,
-    blobColor: 'auto',       // auto — по жанру
-    blobLevel: 'auto',       // auto — «Тихо», у служебных постов — «Нет»
+    fx: 'auto',              // auto — «Рампа» с картинкой, выбранное свечение без картинки, у служебных постов — нет
+    margins: 'wide',         // wide — 112, tight — 72
     logoTone: 'auto',        // auto — по яркости картинки под логотипом
     imageSize: 60,
-    infoCount: 2,
-    customInfo: null,
     customRows: null,
     subline: '',
     detailsLead: '',
@@ -58,7 +60,7 @@
   };
 
   T.DEFAULTS = {
-    v: 2,
+    v: 3,
     mode: 'simple',
     type: 'announce',
     layout: 'frame',
@@ -66,24 +68,24 @@
     format: 'post',
     theme: 'light',
     genre: 'theatre',
+    glow: 'depth',
     status: 'start',
     event: {
       kind: 'Спектакль-концерт',
       title: 'Мёртвые души',
-      lead: 'Гоголь — Евгений Миронов и Мария Смольникова. Шнитке — Юрий Башмет и оркестр «Новая Россия».',
+      lead: 'Поэма Гоголя и «Гоголь-сюита» Шнитке в одном вечере.',
       date: '2027-04-29', time: '19:00',
-      venue: 'Дом музыки', city: 'Москва',
+      venue: 'Дом музыки',
       price: '3000', link: '', age: '12+',
       image: { ref: 'example', x: 50, y: 50, zoom: 1 }
     },
     change: { kind: 'move', date: '2027-05-12', time: '19:00', venue: '', note: '' },
     digest: {
-      kind: 'Подборка',
       title: 'Куда пойти в конце апреля',
       items: [
-        { title: 'Мёртвые души', date: '2027-04-29', time: '19:00', venue: 'Дом музыки', price: '3000', link: '' },
-        { title: 'Название события', date: '2027-04-30', time: '19:00', venue: 'Площадка', price: '', link: '' },
-        { title: 'Название события', date: '2027-05-02', time: '19:00', venue: 'Площадка', price: '', link: '' }
+        { title: 'Мёртвые души', date: '2027-04-29', time: '19:00', venue: 'Дом музыки', price: '3000', link: '', image: { ref: 'example', x: 55, y: 30, zoom: 1 } },
+        { title: 'Название события', date: '2027-04-30', time: '19:00', venue: 'Площадка', price: '', link: '', image: { ref: 'example', x: 12, y: 80, zoom: 1 } },
+        { title: 'Название события', date: '2027-05-02', time: '19:00', venue: 'Площадка', price: '', link: '', image: { ref: 'example', x: 88, y: 45, zoom: 1 } }
       ]
     },
     caption: {
@@ -100,7 +102,7 @@
   };
 
   T.PLACEHOLDER_TITLE = 'Название события';
-  T.LIMITS = { kind: 32, title: 48, lead: 160, subline: 70, detailsLead: 240, venue: 32, city: 24, itemTitle: 36, digestTitle: 44, note: 160 };
+  T.LIMITS = { kind: 32, title: 48, lead: 90, subline: 60, detailsLead: 120, venue: 32, itemTitle: 32, digestTitle: 40, note: 120 };
 
   /* ── утилиты ── */
   T.clone = function (o) { return JSON.parse(JSON.stringify(o)); };

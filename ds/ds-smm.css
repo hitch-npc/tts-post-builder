@@ -1,0 +1,231 @@
+/* ═══ GENERATED FROM smm.tokens.json + tokens.json — НЕ РЕДАКТИРОВАТЬ ВРУЧНУЮ ═══ */
+:root {
+  /* Холсты (соц-форматы) */
+  --smm-w:               1080px;
+  --smm-post-h:          1350px;
+  --smm-story-h:         1920px;
+  --smm-square-h:        1080px;
+  --smm-margin:          112px;
+  --smm-margin-tight:    72px;
+  --smm-gutter:          24px;
+  --smm-story-top:       262px;
+  --smm-story-bottom:    250px;
+  --smm-logo-w:          232px;
+  --smm-image-min:       30%;
+
+  /* Типошкала (под 1080px холст) */
+  --smm-fs-hero:         150px;
+  --smm-fs-display:      118px;
+  --smm-fs-display-md:   102px;
+  --smm-fs-display-sm:   94px;
+  --smm-fs-item:         52px;
+  --smm-fs-meta:         34px;
+  --smm-fs-caption:      28px;
+  --smm-fs-mark:         26px;
+  --smm-fs-num-xl:       120px;
+  --smm-fs-num:          48px;
+
+  /* Цвета: акцент — только активная палочка слайдов */
+  --smm-accent:          #0047FF;
+  --smm-premium:         #F5F4EE;
+
+  /* Тёмная тема */
+  --smm-dark-bg:         #0D0D0D;
+  --smm-dark-fg:         #D6D6D2;
+  --smm-dark-muted:      #A6A6A2;
+  --smm-dark-label:      #7A7A78;
+  --smm-dark-line:       #262930;
+  --smm-dark-hue-cool:   #06277F;
+  --smm-dark-hue-warm:   #4A1F00;
+  --smm-dark-hue-green:  #0A2A0A;
+
+  /* Светлая тема */
+  --smm-light-bg:        #F2F1EB;
+  --smm-light-fg:        #0D0D0D;
+  --smm-light-muted:     #4A4A48;
+  --smm-light-label:     #6A6A68;
+  --smm-light-line:      #A8A8A5;
+  --smm-light-hue-cool:  #BFD0EE;
+  --smm-light-hue-warm:  #F2D5B0;
+  --smm-light-hue-green: #C7E8C8;
+
+  /* Шрифты */
+  --smm-f-display:       'Cormorant Garamond', serif;
+  --smm-f-head:          'Forum', serif;
+  --smm-f-ui:            'Manrope', system-ui, sans-serif;
+  --smm-f-num:           'Oranienbaum', 'Manrope', serif;
+}
+
+/* ───── Холст: формат × тема × жанр ───── */
+.smm-canvas {
+  --smm-x: var(--smm-margin);
+  --smm-pt: var(--smm-margin); --smm-pb: var(--smm-margin);
+  --smm-bg: var(--smm-dark-bg); --smm-fg: var(--smm-dark-fg); --smm-muted: var(--smm-dark-muted);
+  --smm-label: var(--smm-dark-label); --smm-line: var(--smm-dark-line);
+  --smm-hue: var(--smm-dark-hue-cool);
+  --smm-bar-off: color-mix(in srgb, var(--smm-fg) 30%, transparent);
+  position: relative; overflow: hidden; box-sizing: border-box; flex: none;
+  width: var(--smm-w); background: var(--smm-bg); color: var(--smm-fg);
+  font-family: var(--smm-f-ui); display: flex; flex-direction: column;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+.smm-canvas *, .smm-canvas *::before, .smm-canvas *::after { box-sizing: border-box; }
+.smm-canvas--post   { height: var(--smm-post-h); }
+.smm-canvas--square { height: var(--smm-square-h); }
+.smm-canvas--story  { height: var(--smm-story-h); --smm-pt: var(--smm-story-top); --smm-pb: var(--smm-story-bottom); }
+/* узкое поле — по необходимости, стандарт — 112 */
+.smm-canvas--tight { --smm-x: var(--smm-margin-tight); }
+.smm-canvas--tight.smm-canvas--post, .smm-canvas--tight.smm-canvas--square { --smm-pt: var(--smm-margin-tight); --smm-pb: var(--smm-margin-tight); }
+
+.smm-canvas--light {
+  --smm-bg: var(--smm-light-bg); --smm-fg: var(--smm-light-fg); --smm-muted: var(--smm-light-muted);
+  --smm-label: var(--smm-light-label); --smm-line: var(--smm-light-line);
+  --smm-hue: var(--smm-light-hue-cool);
+  --smm-bar-off: color-mix(in srgb, var(--smm-fg) 20%, transparent);
+}
+/* свечение одним цветом жанра: театр и классика — синий, опера — тёплый, мюзикл — зелёный */
+.smm-canvas--warm  { --smm-hue: var(--smm-dark-hue-warm); }
+.smm-canvas--green { --smm-hue: var(--smm-dark-hue-green); }
+.smm-canvas--light.smm-canvas--warm  { --smm-hue: var(--smm-light-hue-warm); }
+.smm-canvas--light.smm-canvas--green { --smm-hue: var(--smm-light-hue-green); }
+.smm-canvas > :where(:not(.smm-fx)) { position: relative; z-index: 1; }
+
+/* ───── Шапка: логотип, возраст, палочки ───── */
+.smm-grid, .smm-head { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: var(--smm-gutter); }
+.smm-head { align-items: center; }
+.smm-logo { grid-column: 1 / 3; width: var(--smm-logo-w); color: var(--smm-fg); display: block; }
+.smm-logo svg { display: block; width: 100%; height: auto; }
+.smm-meta { grid-column: 4 / 7; justify-self: end; display: flex; align-items: center; gap: 32px; }
+.smm-age { font-size: var(--smm-fs-caption); font-weight: 600; letter-spacing: .14em; color: var(--smm-muted); }
+.smm-dots { display: flex; gap: 14px; }
+.smm-dot { width: 58px; height: 4px; border-radius: 2px; background: var(--smm-bar-off); }
+.smm-dot--active { background: var(--smm-accent); }
+
+/* ───── Текст: надзаголовок · название · одна строка ───── */
+.smm-text { display: flex; flex-direction: column; align-items: flex-start; }
+.smm-eyebrow { font-size: var(--smm-fs-caption); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--smm-muted); }
+.smm-mark {
+  display: inline-flex; align-items: center; font-size: var(--smm-fs-mark); font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; padding: 12px 18px; border-radius: 2px; background: var(--smm-fg); color: var(--smm-bg); line-height: 1;
+}
+.smm-title {
+  margin: 20px 0 0; font-family: var(--smm-f-display); font-weight: 500; font-size: var(--smm-fs-display);
+  line-height: 1; overflow-wrap: anywhere; text-wrap: balance;
+}
+.smm-title:first-child { margin-top: 0; }
+.smm-mark + .smm-title { margin-top: 28px; }
+.smm-title--md { font-size: var(--smm-fs-display-md); }
+.smm-title--sm { font-size: var(--smm-fs-display-sm); }
+/* исключение по решению владельца — капс названия */
+.smm-title--caps { text-transform: uppercase; letter-spacing: .02em; }
+.smm-line { margin: 30px 0 0; font-size: var(--smm-fs-meta); font-weight: 500; line-height: 1.3; color: var(--smm-fg); }
+.smm-lead { margin: 24px 0 0; font-size: var(--smm-fs-meta); font-weight: 500; line-height: 1.4; color: var(--smm-muted); text-wrap: pretty; }
+.smm-num { font-family: var(--smm-f-num); font-weight: 400; }
+.smm-big { margin-top: 44px; font-family: var(--smm-f-num); font-size: var(--smm-fs-num-xl); line-height: 1; }
+.smm-sub { margin: 16px 0 0; font-size: var(--smm-fs-meta); font-weight: 500; color: var(--smm-muted); }
+.smm-note { align-self: stretch; margin: 40px 0 0; padding-top: 28px; border-top: 2px solid var(--smm-line); font-size: var(--smm-fs-meta); font-weight: 500; line-height: 1.35; }
+.smm-was { color: var(--smm-muted); text-decoration: line-through; text-decoration-thickness: 2px; }
+
+/* ───── Картинка: не меньше 30 % высоты холста ───── */
+.smm-img { position: relative; overflow: hidden; background: var(--smm-line); min-height: var(--smm-image-min); }
+.smm-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ───── Макеты ───── */
+/* «Картинка в поле» */
+.smm-frame { padding: var(--smm-pt) var(--smm-x) var(--smm-pb); }
+.smm-frame > .smm-img  { flex: 1 1 0; margin-top: 48px; }
+.smm-frame > .smm-text { flex: 0 0 auto; margin-top: 56px; }
+
+/* «Картинка полосой» и обложка альбома: картинка во всю ширину, под ней панель */
+.smm-band > .smm-img, .smm-cover > .smm-img { flex: 0 1 var(--smm-img-h, 60%); }
+.smm-band > .smm-scrim {
+  position: absolute; top: 0; left: 0; right: 0; height: calc(var(--smm-pt) + 170px); z-index: 1;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--smm-scrim) 45%, transparent) 0%, transparent 100%);
+}
+.smm-band > .smm-head { position: absolute; top: var(--smm-pt); left: var(--smm-x); right: var(--smm-x); z-index: 2; }
+/* логотип на картинке: светлый на тёмной афише, тёмный на светлой */
+.smm-band--on-dark  { --smm-scrim: var(--smm-dark-bg); }
+.smm-band--on-dark > .smm-head  { --smm-fg: var(--smm-dark-fg); --smm-muted: var(--smm-dark-fg); --smm-bar-off: color-mix(in srgb, var(--smm-dark-fg) 30%, transparent); }
+.smm-band--on-light { --smm-scrim: var(--smm-light-bg); }
+.smm-band--on-light > .smm-head { --smm-fg: var(--smm-light-fg); --smm-muted: var(--smm-light-fg); --smm-bar-off: color-mix(in srgb, var(--smm-light-fg) 30%, transparent); }
+.smm-panel { position: relative; overflow: hidden; flex: 1 0 auto; display: flex; flex-direction: column; justify-content: space-between; padding: 72px var(--smm-x) var(--smm-pb); }
+.smm-band > .smm-panel { justify-content: flex-end; }
+.smm-panel > :where(:not(.smm-fx)) { position: relative; z-index: 1; }
+.smm-cover > .smm-panel { padding-top: 64px; }
+
+/* лист без картинки: детали альбома, перенос, отмена, подборка, «Типографика» */
+.smm-sheet { padding: var(--smm-pt) var(--smm-x) var(--smm-pb); justify-content: space-between; }
+/* воздух под шапкой: содержимое не подходит к логотипу ближе 96 px */
+.smm-sheet > .smm-head { margin-bottom: 96px; }
+.smm-sheet .smm-span { grid-column: 1 / -1; }
+.smm-sheet .smm-grid > .smm-lead { grid-column: 1 / 6; }
+.smm-gap { grid-column: 1 / -1; height: 56px; }
+.smm-type .smm-title { font-size: var(--smm-fs-hero); line-height: .98; }
+
+/* таблица деталей: пункт в одну строку */
+.smm-rule { grid-column: 1 / -1; height: 2px; background: var(--smm-line); }
+.smm-row-label { grid-column: 1 / 3; padding: 28px 0; font-size: var(--smm-fs-caption); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--smm-label); line-height: 1.3; }
+.smm-row-val { grid-column: 3 / 7; padding: 28px 0; font-size: var(--smm-fs-meta); font-weight: 500; line-height: 1.3; text-wrap: pretty; }
+
+/* подборка: дата · событие · площадка; превью 4:5 — по желанию */
+.smm-dg-when { grid-column: 1 / 3; padding: 26px 0; display: flex; flex-direction: column; gap: 6px; }
+.smm-dg-when .smm-num { font-size: var(--smm-fs-num); line-height: 1; }
+.smm-label { font-size: var(--smm-fs-caption); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--smm-label); }
+.smm-dg-what { grid-column: 3 / 7; padding: 26px 0; min-width: 0; }
+.smm-dg-title { font-family: var(--smm-f-display); font-weight: 500; font-size: var(--smm-fs-item); line-height: 1.05; text-wrap: balance; }
+.smm-dg-meta { margin-top: 10px; font-size: var(--smm-fs-meta); font-weight: 500; line-height: 1.3; color: var(--smm-muted); }
+.smm-dg-thumb { grid-column: 1 / 2; margin: 24px 0; aspect-ratio: 4 / 5; position: relative; overflow: hidden; background: var(--smm-line); align-self: start; }
+.smm-dg-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.smm-dg-thumbs .smm-dg-when { grid-column: 2 / 4; }
+.smm-dg-thumbs .smm-dg-what { grid-column: 4 / 7; }
+.smm-dg-thumbs .smm-dg-title { font-size: 46px; }
+
+/* ───── Свечение: один цвет жанра. Слой .smm-fx — первым в холсте или панели ───── */
+.smm-fx { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.smm-fx::before, .smm-fx::after { content: ""; position: absolute; pointer-events: none; }
+/* «Рампа» — для постов с картинкой: тихий свет снизу и тонкая кромка */
+.smm-fx--footlight::before {
+  left: -20%; right: -20%; bottom: -18%; height: 62%;
+  background: radial-gradient(50% 46% at 50% 100%, color-mix(in srgb, var(--smm-hue) 80%, var(--smm-fg)) 0%, var(--smm-hue) 24%, color-mix(in srgb, var(--smm-hue) 40%, transparent) 56%, transparent 80%);
+  filter: blur(12px);
+}
+.smm-fx--footlight::after {
+  left: 14%; right: 14%; bottom: 0; height: 4px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--smm-hue) 55%, var(--smm-fg)) 50%, transparent);
+  filter: blur(2px); opacity: .8;
+}
+/* «Луч» — свет падает сверху наискось, внизу пятно, как на сцене */
+.smm-fx--beam::before {
+  left: -30%; top: -20%; width: 160%; height: 150%;
+  background: conic-gradient(from 146deg at 22% 0%, transparent 0deg, color-mix(in srgb, var(--smm-hue) 85%, transparent) 8deg, color-mix(in srgb, var(--smm-hue) 45%, transparent) 19deg, transparent 30deg);
+  filter: blur(28px);
+  -webkit-mask-image: linear-gradient(180deg, transparent 8%, black 45%); mask-image: linear-gradient(180deg, transparent 8%, black 45%);
+}
+.smm-fx--beam::after {
+  left: 30%; width: 90%; bottom: -14%; height: 36%;
+  background: radial-gradient(50% 50% at 50% 50%, var(--smm-hue) 0%, color-mix(in srgb, var(--smm-hue) 35%, transparent) 45%, transparent 72%);
+  filter: blur(16px);
+}
+/* «Глубина» — вытянутая полоса и дымка разной силы */
+.smm-fx--depth::before {
+  inset: -14%;
+  background:
+    radial-gradient(48% 14% at 62% 84%, var(--smm-hue) 0%, transparent 72%),
+    radial-gradient(28% 24% at 94% 94%, var(--smm-hue) 0%, transparent 70%),
+    radial-gradient(52% 40% at 104% 58%, color-mix(in srgb, var(--smm-hue) 55%, transparent) 0%, transparent 72%),
+    radial-gradient(34% 22% at 14% 104%, color-mix(in srgb, var(--smm-hue) 45%, transparent) 0%, transparent 72%);
+  transform: rotate(-9deg);
+  filter: blur(24px);
+}
+/* «Ореол» — светящееся кольцо у края, как пятно прожектора */
+.smm-fx--halo::before, .smm-fx--halo::after { right: -38%; bottom: -46%; width: 100%; aspect-ratio: 1; border-radius: 9999px; }
+.smm-fx--halo::before {
+  background: radial-gradient(circle at 50% 50%, transparent 50%, color-mix(in srgb, var(--smm-hue) 70%, transparent) 57%, color-mix(in srgb, var(--smm-hue) 82%, var(--smm-fg)) 61%, color-mix(in srgb, var(--smm-hue) 50%, transparent) 65%, transparent 73%);
+  filter: blur(10px);
+}
+.smm-fx--halo::after {
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--smm-hue) 35%, transparent) 0%, transparent 58%);
+  filter: blur(18px);
+}
+
+.smm-premium { color: var(--smm-premium); }

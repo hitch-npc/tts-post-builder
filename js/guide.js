@@ -15,9 +15,11 @@
     if (mut) mut(s);
     return s;
   }
-  function slideHtml(state, i) {
+  // raw — без подгонки названия: так «Не так» показывает, во что превращается пост без ограничений конструктора
+  function slideHtml(state, i, raw) {
     var spec = T.spec(state, env);
-    T.layout(spec, i || 0, $('measure'), 1);
+    if (raw) $('measure').innerHTML = T.renderSlide(spec, i || 0, spec.titleSize || T.BASE.frame);
+    else T.layout(spec, i || 0, $('measure'), 1);
     var html = $('measure').innerHTML;
     $('measure').innerHTML = '';
     return { html: html, spec: spec };
@@ -33,59 +35,65 @@
 
   /* ── правки «Не так», которых конструктор не допускает ── */
   var tweaks = {
-    cobalt: function (p) {
-      p.querySelectorAll('.p-eyebrow, .p-label').forEach(function (el) { el.style.color = '#0047FF'; });
+    colors: function (p) {
+      var m = p.querySelector('.smm-mark');
+      if (m) m.style.cssText += ';background:#FB923C;color:#FFFFFF';
+      p.querySelectorAll('.smm-line, .smm-age').forEach(function (el) { el.style.color = '#0047FF'; });
     },
     overImage: function (p) {
-      var im = p.querySelector('.p-img'), panel = p.querySelector('.p-panel');
+      var im = p.querySelector('.smm-img'), panel = p.querySelector('.smm-panel'), scrim = p.querySelector('.smm-scrim');
       im.style.cssText += ';position:absolute;inset:0;height:auto;flex:none;z-index:0';
-      panel.style.cssText += ';background:none;justify-content:flex-end;padding-top:0;z-index:1';
-      p.style.setProperty('--p-fg', '#FFFFFF'); p.style.setProperty('--p-muted', '#EDEDED');
-      p.style.setProperty('--p-label', '#E0E0E0'); p.style.setProperty('--p-line', '#FFFFFF');
+      if (scrim) scrim.style.display = 'none';
+      panel.style.cssText += ';background:none;z-index:1';
+      p.style.setProperty('--smm-fg', '#FFFFFF'); p.style.setProperty('--smm-muted', '#EDEDED');
     },
     decor: function (p) {
-      var im = p.querySelector('.p-img');
+      var im = p.querySelector('.smm-img');
       im.style.cssText += ';border-radius:48px;box-shadow:0 30px 60px #00000080;border:10px solid #FFFFFF';
-      p.querySelector('.p-title').style.textShadow = '0 8px 16px #00000059';
-      p.querySelectorAll('.p-info-cell').forEach(function (c) { c.style.cssText += ';background:#FFFFFF;border-radius:28px;padding:20px;box-shadow:0 12px 30px #0000002E'; });
+      p.querySelector('.smm-title').style.textShadow = '0 8px 16px #00000059';
+      var l = p.querySelector('.smm-line');
+      if (l) l.style.cssText += ';background:#FFFFFF;border-radius:40px;padding:14px 28px;box-shadow:0 12px 30px #0000002E';
     },
     storyEdges: function (p) {
       p.style.paddingTop = '48px'; p.style.paddingBottom = '40px';
     }
   };
 
-  var LONG_LEAD = 'Гоголь — Евгений Миронов и Мария Смольникова. Шнитке — Юрий Башмет и оркестр «Новая Россия». Режиссёр — Мария Брусникина. Один вечер в Доме музыки.';
   var BAD_CAPTION = 'МЁРТВЫЕ ДУШИ!!! 🔥🔥🔥 СПЕШИТЕ!!! Евгений Миронов и Юрий Башмет на одной сцене в спектакле-концерте по поэме Гоголя с музыкой Шнитке, а также Мария Смольникова и оркестр Новая Россия, режиссер Мария Брусникина, 29.04 в 19.00 в Доме музыки, билеты от 3000 руб по ссылке, торопитесь, места разлетаются!!! 🎭🎭🎭';
   var BAD_TEXT = 'Спектакль-концерт "Мёртвые души" - Гоголь и Шнитке в одном вечере. Начало в 19:00, билеты от 3000 ₽, 10-12 ряды партера...';
 
   /* ── пары ── */
   var EX = [
     { id: 'overload', title: 'Не перегружайте картинку',
-      why: 'Каждая лишняя строка делает мельче всё остальное: картинка ужимается, название уменьшается, а на телефоне текст сливается. Цены, условия и подробности — в текст поста.',
-      bad: function () { return base(function (s) { s.type = 'status'; s.status = 'few'; s.event.kind = 'Спектакль-концерт с оркестром'; s.event.lead = LONG_LEAD; s.adv.infoCount = 3; }); },
+      why: 'Каждая лишняя строка делает мельче всё остальное: картинка ужимается, название уменьшается, а на телефоне текст сливается. На картинке — надзаголовок, название и одна строка «когда и где». Цена, состав, условия — в текст поста.',
+      bad: function () { return base(function (s) { s.type = 'status'; s.status = 'few'; s.event.title = 'Мёртвые души. Гоголь и Шнитке'; s.adv.subline = '29 апреля, 19:00 · Дом музыки, Светлановский зал · от 3 000 ₽ · Миронов, Башмет'; }); },
+      good: function () { return base(function (s) { s.type = 'status'; s.status = 'few'; }); } },
+    { id: 'city', title: 'Не пишите город и очевидное',
+      why: 'Сервис работает в одном городе — «Москва» на картинке ничего не сообщает и только удлиняет строку. То же с «билеты», «купить», «начало в»: дата и время говорят сами.',
+      bad: function () { return base(function (s) { s.adv.subline = 'Начало 29 апреля в 19:00 · Москва, Дом музыки'; }); },
       good: function () { return base(); } },
     { id: 'caps', title: 'Не пишите название капсом',
       why: 'Капс читается медленнее и выглядит как крик. По правилу 14.3 названия событий пишутся обычным регистром, капс — только по решению владельца.',
       bad: function () { return base(function (s) { s.adv.titleCaps = true; }); },
       good: function () { return base(); } },
-    { id: 'long-title', title: 'Не растягивайте название на три строки',
-      why: 'Длинное название уменьшается и съедает картинку. На холсте — имя события, всё остальное — в подводку.',
-      bad: function () { return base(function (s) { s.event.title = 'Мёртвые души: Гоголь, Шнитке и оркестр «Новая Россия»'; s.adv.titleSize = 118; s.event.lead = 'Один вечер в Доме музыки.'; }); },
+    { id: 'long-title', title: 'Не растягивайте название на три строки', raw: true,
+      why: 'Три строки названия съедают картинку и ломают поля. На холсте — имя события, подробности — в текст поста. Конструктор сам уменьшит название до двух строк, но короткое всегда читается лучше.',
+      bad: function () { return base(function (s) { s.event.title = 'Мёртвые души: Гоголь, Шнитке и оркестр «Новая Россия»'; s.adv.titleSize = 118; }); },
       good: function () { return base(); } },
     { id: 'emoji', title: 'Не ставьте на картинку эмодзи и восклицательные знаки',
       why: 'Эмодзи на холсте рисуются чужим шрифтом и спорят с типографикой, восклицательные знаки делают анонс крикливым. Эмодзи уместны в тексте поста — по одному в начале строки.',
-      bad: function () { return base(function (s) { s.event.title = 'Мёртвые души 🔥'; s.event.lead = 'Миронов и Башмет на одной сцене!!! Только один вечер!!!'; }); },
+      bad: function () { return base(function (s) { s.event.title = 'Мёртвые души 🔥'; s.event.kind = 'Только один вечер!!!'; }); },
       good: function () { return base(); } },
-    { id: 'cobalt', title: 'Не красьте мелкий текст в кобальт',
-      why: 'Кобальт на мелких подписях выглядит ссылкой и спорит с афишей. По правилу 14.3 кобальт в тексте — только крупно; надзаголовок и подписи — серые. На холсте кобальт есть только у активной палочки слайдов.',
-      bad: function () { return base(); }, badTweak: tweaks.cobalt,
-      good: function () { return base(); } },
-    { id: 'blobs', title: 'Не включайте яркое свечение рядом с афишей',
-      why: 'Яркое свечение и яркая афиша — два пятна, и взгляду не за что зацепиться. С картинкой — «Тихо», «Ярко» — только для слайда без картинки.',
-      bad: function () { return base(function (s) { s.theme = 'dark'; s.genre = 'opera'; s.adv.blobLevel = 'full'; }); },
+    { id: 'colors', title: 'Не раскрашивайте метки и подписи',
+      why: 'Цветная метка и синие подписи — ещё три пятна рядом с афишей. Метка статуса — инверсия: светлая на тёмном, тёмная на светлом. Кобальт на холсте — только у активной палочки слайдов.',
+      bad: function () { return base(function (s) { s.type = 'status'; s.status = 'few'; }); }, badTweak: tweaks.colors,
+      good: function () { return base(function (s) { s.type = 'status'; s.status = 'few'; }); } },
+    { id: 'glow', title: 'Не ставьте яркое свечение рядом с афишей',
+      why: 'Яркое свечение и афиша — два пятна, и взгляду не за что зацепиться. С картинкой — «Рампа», тихий свет снизу. «Луч», «Глубина» и «Ореол» — для постов без картинки.',
+      bad: function () { return base(function (s) { s.theme = 'dark'; s.genre = 'opera'; s.adv.fx = 'beam'; }); },
       good: function () { return base(function (s) { s.theme = 'dark'; s.genre = 'opera'; }); } },
     { id: 'over-image', title: 'Не кладите текст на картинку',
-      why: 'На пёстрой афише текст и логотип теряются, а на другой картинке шаблон сломается. Текст стоит на спокойном поле — под картинкой или рядом.',
+      why: 'На пёстрой афише текст и логотип теряются, а на другой картинке шаблон сломается. Текст стоит на спокойном поле — под картинкой.',
       bad: function () { return base(function (s) { s.layout = 'band'; }); }, badTweak: tweaks.overImage,
       good: function () { return base(function (s) { s.layout = 'band'; }); } },
     { id: 'decor', title: 'Не добавляйте рамки, тени и скругления',
@@ -98,22 +106,22 @@
       good: function () { return base(); } },
     { id: 'square', title: 'Не публикуйте квадрат в Instagram', view: 'tile',
       why: 'Сетка профиля показывает середину поста в пропорции 3:4. У квадрата срезается примерно по 135 px с каждой стороны — вместе с логотипом и краем текста. 4:5 теряет около 34 px, это внутри полей.',
-      bad: function () { return base(function (s) { s.format = 'square'; s.event.lead = ''; }); },
+      bad: function () { return base(function (s) { s.format = 'square'; }); },
       good: function () { return base(); } },
     { id: 'story', title: 'Не прячьте главное у краёв сторис', view: 'story',
       why: 'Верх сторис закрывают полоска прогресса и имя, низ — строка ответа. Название и даты у краёв окажутся под интерфейсом.',
       bad: function () { return base(function (s) { s.format = 'story'; }); }, badTweak: tweaks.storyEdges,
       good: function () { return base(function (s) { s.format = 'story'; }); } },
     { id: 'series', title: 'Не меняйте стиль от поста к посту', view: 'grid',
-      why: 'В профиле посты стоят рядом. Если каждый в своей теме и шаблоне, лента выглядит случайной. Выберите тему и шаблон на серию и держите их.',
+      why: 'В профиле посты стоят рядом. Если каждый в своей теме, шаблоне и со своим свечением, лента выглядит случайной. Выберите тему и шаблон на серию и держите их.',
       bad: function () {
         return [
           base(function (s) { s.layout = 'band'; s.theme = 'dark'; s.adv.titleCaps = true; }),
-          base(function (s) { s.type = 'status'; s.status = 'start'; s.theme = 'light'; s.adv.blobLevel = 'full'; s.genre = 'musical'; }),
-          base(function (s) { s.layout = 'album'; s.theme = 'dark'; s.adv.blobLevel = 'full'; s.genre = 'opera'; }),
-          base(function (s) { s.type = 'status'; s.status = 'few'; s.layout = 'band'; s.theme = 'light'; }),
+          base(function (s) { s.type = 'status'; s.status = 'start'; s.layout = 'type'; s.glow = 'halo'; s.genre = 'musical'; }),
+          base(function (s) { s.layout = 'album'; s.theme = 'dark'; s.adv.fx = 'beam'; s.genre = 'opera'; }),
+          base(function (s) { s.type = 'status'; s.status = 'few'; s.layout = 'band'; }),
           base(function (s) { s.type = 'change'; s.theme = 'dark'; }),
-          base(function (s) { s.type = 'status'; s.status = 'last'; s.theme = 'light'; s.adv.titleCaps = true; s.adv.infoCount = 3; })
+          base(function (s) { s.type = 'status'; s.status = 'last'; s.adv.titleCaps = true; s.adv.margins = 'tight'; })
         ];
       },
       good: function () {
@@ -158,7 +166,7 @@
       }).join('') + '</div>';
       return;
     }
-    var r = slideHtml(make(), 0);
+    var r = slideHtml(make(), 0, kind === 'bad' && ex.raw);
     if (view === 'tg') {
       var st = make();
       cell.innerHTML = T.previewTelegram({ H: r.spec.H, slides: [r.html], caption: kind === 'bad' ? ex.badCaption : T.captionText(st), tgTheme: 'dark' });
@@ -166,7 +174,7 @@
     }
     if (view === 'story') {
       cell.innerHTML = T.previewStory({ H: r.spec.H, slides: [r.html], handle: 'tickettoshow.ru', platform: 'ig' });
-      if (tweak) tweak(cell.querySelector('.poster'));
+      if (tweak) tweak(cell.querySelector('.smm-canvas'));
       return;
     }
     if (view === 'tile') {
@@ -175,7 +183,7 @@
       return;
     }
     cell.innerHTML = scaledBox(r.html, w, r.spec.H);
-    if (tweak) tweak(cell.querySelector('.poster'));
+    if (tweak) tweak(cell.querySelector('.smm-canvas'));
   }
 
   function build() {

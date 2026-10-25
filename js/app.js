@@ -62,7 +62,7 @@
     var slides = s.slides.map(function (_, i) {
       var f = T.layout(s, i, host, 1);
       var html = host.innerHTML, box = null;
-      var im = host.querySelector('.p-img');
+      var im = host.querySelector('.smm-img');
       if (im) box = { w: im.offsetWidth, h: im.offsetHeight };
       return { html: html, fit: f, box: box };
     });
@@ -70,7 +70,8 @@
     var overs = slides.map(function (x) { return x.fit.over; });
     var fit = {
       over: Math.max.apply(null, overs), overSlide: overs.indexOf(Math.max.apply(null, overs)),
-      size: slides[0].fit.size, start: slides[0].fit.start
+      size: slides[0].fit.size, start: slides[0].fit.start, px: slides[0].fit.px,
+      lines: Math.max.apply(null, slides.map(function (x) { return x.fit.lines; }))
     };
     var img = null;
     if (s.layout === 'frame' || s.layout === 'band' || s.layout === 'album') {
@@ -107,7 +108,7 @@
   function guidesHtml(s) {
     var H = s.H, out = '<div class="g-box" style="height:' + H + 'px">';
     // поля холста
-    out += '<div class="g-margin" style="left:' + T.SIDE + 'px;right:' + T.SIDE + 'px;top:' + s.pt + 'px;bottom:' + s.pb + 'px"></div>';
+    out += '<div class="g-margin" style="left:' + s.x + 'px;right:' + s.x + 'px;top:' + s.pt + 'px;bottom:' + s.pb + 'px"></div>';
     if (s.format === 'story') {
       out += '<div class="g-cut" style="top:0;height:' + s.pt + 'px;left:0;right:0"><span>Интерфейс сторис</span></div>';
       out += '<div class="g-cut" style="bottom:0;height:' + s.pb + 'px;left:0;right:0"><span>Строка ответа</span></div>';
@@ -192,7 +193,6 @@
     return {
       mode: state.mode, type: state.type, layout: layout, format: state.format, kind: state.change.kind,
       titleSize: state.adv.titleSize ? 'manual' : 'auto',
-      infoCount: state.adv.infoCount ? 'some' : 'none',
       customRows: state.adv.customRows ? 'yes' : 'no',
       exportType: state.adv.exportType
     };
@@ -228,7 +228,6 @@
       o.textContent = len + ' / ' + o.getAttribute('data-max');
       o.classList.toggle('over', soft && len > soft);
     });
-    $('customInfo').checked = !!state.adv.customInfo;
     $('customRows').checked = !!state.adv.customRows;
     // номера шагов идут подряд по видимым разделам
     var n = 0;
@@ -237,10 +236,10 @@
       if (st && !sec.hidden) st.textContent = ++n;
     });
     $('typeHint').textContent = {
-      announce: 'Новое событие: афиша, название, когда и где.',
-      status: 'Тот же анонс с цветной меткой: зелёная — старт продаж, оранжевая — мало мест, красная — последние билеты.',
+      announce: 'Новое событие: название и одна строка — когда и где. Остальное — в тексте поста.',
+      status: 'Тот же анонс с меткой над названием: старт продаж, мало мест или последние билеты.',
       change: 'Служебный пост без картинки и свечения: новая дата и что делать с билетами.',
-      digest: 'От 3 до 5 событий одним списком на одной картинке.'
+      digest: '3–5 событий одним списком. Картинки у событий — по желанию: превью слева.'
     }[state.type];
     var e = state.event;
     $('imgInfo').textContent = e.image.ref === 'example' ? 'Сейчас стоит картинка-пример.' : '';
@@ -248,7 +247,7 @@
   function syncAutoPlaceholders() {
     var e = state.event;
     var auto = {
-      subline: [T.fmt.short(e.date), e.venue].filter(Boolean).join(' · ').replace(/ /g, ' '),
+      subline: [T.fmt.dayMonth(e.date) + (e.time ? ', ' + e.time : ''), e.venue].filter(Boolean).join(' · ').replace(/\u00A0/g, ' '),
       detailsLead: e.lead,
       why: state.type === 'status' ? T.STATUSES[state.status].why : 'Например: билеты только поступили в продажу',
       change: 'Соберётся из дат'
@@ -263,26 +262,20 @@
     var items = state.digest.items;
     $('digestList').innerHTML = items.map(function (it, i) {
       var p = 'digest.items.' + i + '.';
+      var src = it.image && it.image.ref ? T.images.src(it.image.ref) : '';
       return '<div class="list-item"><div class="list-item-head"><span class="label">Событие ' + (i + 1) + '</span>' +
         (items.length > 2 ? '<button class="link-btn" type="button" data-del-item="' + i + '">Удалить</button>' : '') + '</div>' +
-        '<div class="field"><input class="input" data-bind="' + p + 'title" maxlength="36" aria-label="Название события ' + (i + 1) + '" placeholder="Название"></div>' +
+        '<div class="field"><input class="input" data-bind="' + p + 'title" maxlength="32" aria-label="Название события ' + (i + 1) + '" placeholder="Название"></div>' +
         '<div class="row"><div class="field"><input class="input" type="date" data-bind="' + p + 'date" aria-label="Дата"></div>' +
         '<div class="field"><input class="input" type="time" data-bind="' + p + 'time" aria-label="Начало"></div></div>' +
         '<div class="row"><div class="field"><input class="input" data-bind="' + p + 'venue" maxlength="32" aria-label="Площадка" placeholder="Площадка"></div>' +
-        '<div class="field"><input class="input" data-bind="' + p + 'price" inputmode="numeric" maxlength="9" aria-label="Цена от, ₽" placeholder="Цена от, ₽"></div></div>' +
-        '<div class="field"><input class="input" type="url" data-bind="' + p + 'link" aria-label="Ссылка на это событие" placeholder="Ссылка на это событие — по желанию"></div></div>';
+        '<div class="field"><input class="input" data-bind="' + p + 'price" inputmode="numeric" maxlength="9" aria-label="Цена от, ₽ — для текста поста" placeholder="Цена от, ₽"></div></div>' +
+        '<div class="field"><input class="input" type="url" data-bind="' + p + 'link" aria-label="Ссылка на это событие" placeholder="Ссылка на это событие — по желанию"></div>' +
+        '<div class="item-img">' + (src ? '<img src="' + esc(src) + '" alt="">' : '') +
+          '<button class="btn btn-ghost btn-sm" type="button" data-item-img="' + i + '">' + (src ? 'Заменить картинку' : 'Добавить картинку') + '</button>' +
+          (src ? '<button class="link-btn" type="button" data-item-img-del="' + i + '">Убрать</button>' : '') + '</div></div>';
     }).join('');
     $('addItem').disabled = items.length >= 5;
-
-    // свои значения строки данных
-    var ci = state.adv.customInfo;
-    $('infoList').innerHTML = !ci ? '' : ci.slice(0, state.adv.infoCount).map(function (c, i) {
-      var p = 'adv.customInfo.' + i + '.';
-      return '<div class="list-item"><div class="list-item-head"><span class="label">Колонка ' + (i + 1) + '</span></div>' +
-        '<div class="field"><input class="input" data-bind="' + p + 'label" maxlength="16" aria-label="Подпись колонки ' + (i + 1) + '" placeholder="Подпись"></div>' +
-        '<div class="field"><input class="input" data-bind="' + p + 'a" maxlength="24" aria-label="Первая строка колонки ' + (i + 1) + '" placeholder="Первая строка"></div>' +
-        '<div class="field"><input class="input" data-bind="' + p + 'b" maxlength="24" aria-label="Вторая строка колонки ' + (i + 1) + '" placeholder="Вторая строка, серым"></div></div>';
-    }).join('');
 
     // своя таблица
     var rows = state.adv.customRows;
@@ -290,9 +283,8 @@
       var p = 'adv.customRows.' + i + '.';
       return '<div class="list-item"><div class="list-item-head"><span class="label">Строка ' + (i + 1) + '</span>' +
         (rows.length > 1 ? '<button class="link-btn" type="button" data-del-row="' + i + '">Удалить</button>' : '') + '</div>' +
-        '<div class="field"><input class="input" data-bind="' + p + 'label" maxlength="16" aria-label="Подпись строки ' + (i + 1) + '" placeholder="Подпись"></div>' +
-        '<div class="field"><input class="input" data-bind="' + p + 'a" maxlength="48" aria-label="Значение строки ' + (i + 1) + '" placeholder="Значение"></div>' +
-        '<div class="field"><input class="input" data-bind="' + p + 'b" maxlength="56" aria-label="Вторая строка ' + (i + 1) + '" placeholder="Вторая строка, серым"></div></div>';
+        '<div class="field"><input class="input" data-bind="' + p + 'label" maxlength="10" aria-label="Подпись строки ' + (i + 1) + '" placeholder="Подпись, до 10 знаков"></div>' +
+        '<div class="field"><input class="input" data-bind="' + p + 'a" maxlength="40" aria-label="Значение строки ' + (i + 1) + '" placeholder="Значение"></div></div>';
     }).join('');
     $('addRow').disabled = !rows || rows.length >= 5;
   }
@@ -314,7 +306,7 @@
       if (key === 'status' && Object.keys(T.STATUSES).some(function (k) { return T.STATUSES[k].why === state.caption.why; })) state.caption.why = '';
       setPath(state, key, v);
       if (key === 'layout' || key === 'type') state.slide = 1;
-      update({ lists: key === 'adv.infoCount' });
+      update({ lists: false });
       return;
     }
     var mode = e.target.closest('[data-set-mode]');
@@ -334,6 +326,14 @@
     if (e.target.closest('[data-copy-caption]')) { copyCaption(); return; }
     var hd = e.target.closest('[data-hist-del]');
     if (hd) { T.history.remove(+hd.getAttribute('data-hist-del')).then(refreshHistory); return; }
+    var ii = e.target.closest('[data-item-img]');
+    if (ii) { itemTarget = +ii.getAttribute('data-item-img'); $('itemFile').click(); return; }
+    var iid = e.target.closest('[data-item-img-del]');
+    if (iid) {
+      var it = state.digest.items[+iid.getAttribute('data-item-img-del')];
+      if (it.image && it.image.ref && it.image.ref !== 'example') T.images.drop(it.image.ref);
+      it.image = null; update({ lists: true }); return;
+    }
     if (e.target.closest('#histAdd')) { $('histFile').click(); return; }
     if (e.target.closest('#histClear')) {
       if (window.confirm('Убрать из сетки все прошлые посты?')) T.history.clear().then(refreshHistory);
@@ -351,26 +351,19 @@
 
   $('addItem').addEventListener('click', function () {
     if (state.digest.items.length >= 5) return;
-    state.digest.items.push({ title: '', date: '', time: '19:00', venue: '', price: '', link: '' });
-    update({ lists: true });
-  });
-  $('customInfo').addEventListener('change', function () {
-    if (this.checked) {
-      var probe = T.clone(state); probe.adv.customInfo = null; probe.adv.infoCount = 3;
-      state.adv.customInfo = T.spec(probe, env).info.map(function (c) { return { label: c.label, a: plain(c.a), b: plain(c.b) }; });
-    } else state.adv.customInfo = null;
+    state.digest.items.push({ title: '', date: '', time: '19:00', venue: '', price: '', link: '', image: null });
     update({ lists: true });
   });
   $('customRows').addEventListener('change', function () {
     if (this.checked) {
       var probe = T.clone(state); probe.adv.customRows = null;
-      state.adv.customRows = T.spec(probe, env).rows.map(function (r) { return { label: r.label, a: plain(r.a), b: plain(r.b) }; });
+      state.adv.customRows = T.spec(probe, env).rows.map(function (r) { return { label: r.label, a: plain(r.a) }; });
     } else state.adv.customRows = null;
     update({ lists: true });
   });
-  function plain(s) { return String(s || '').replace(/ /g, ' '); }
+  function plain(s) { return String(s || '').replace(/\u00A0/g, ' '); }
   $('addRow').addEventListener('click', function () {
-    if (state.adv.customRows && state.adv.customRows.length < 5) { state.adv.customRows.push({ label: 'Подпись', a: 'Значение', b: '' }); update({ lists: true }); }
+    if (state.adv.customRows && state.adv.customRows.length < 5) { state.adv.customRows.push({ label: 'Подпись', a: 'Значение' }); update({ lists: true }); }
   });
 
   /* ── картинка ── */
@@ -401,7 +394,7 @@
   // Кадр двигается прямо на макете
   var drag = null;
   stage.addEventListener('pointerdown', function (e) {
-    var box = e.target.closest && e.target.closest('.p-img');
+    var box = e.target.closest && e.target.closest('.smm-img');
     if (!box || !stageInner.contains(box)) return;
     var im = box.querySelector('img');
     if (!im || !im.naturalWidth) return;
@@ -434,6 +427,20 @@
   }
   stage.addEventListener('pointerup', endDrag);
   stage.addEventListener('pointercancel', endDrag);
+
+  // картинка события в подборке
+  var itemTarget = -1;
+  $('itemFile').addEventListener('change', function () {
+    var file = this.files && this.files[0], i = itemTarget;
+    this.value = '';
+    if (!file || i < 0 || !state.digest.items[i]) return;
+    T.readImage(file, 1200, 0.9).then(function (r) { return T.images.put(r.data); }).then(function (id) {
+      var it = state.digest.items[i], old = it.image && it.image.ref;
+      it.image = { ref: id, x: 50, y: 50, zoom: 1 };
+      if (old && old !== 'example') T.images.drop(old);
+      update({ lists: true });
+    }).catch(function (err) { toast(err.message || 'Не получилось открыть файл'); });
+  });
 
   /* ── история для сетки Instagram ── */
   function refreshHistory() {
@@ -552,9 +559,11 @@
   $('appLogo').innerHTML = T.logo();
   T.loadState().then(function (s) {
     state = s;
-    return T.images.load(state.event.image.ref);
-  }).then(function (src) {
-    if (!src) state.event.image = T.clone(T.DEFAULTS.event.image); // картинка не нашлась в браузере
+    var refs = state.digest.items.map(function (it) { return it.image && it.image.ref; }).filter(Boolean);
+    return Promise.all([T.images.load(state.event.image.ref)].concat(refs.map(function (r) { return T.images.load(r); })));
+  }).then(function (srcs) {
+    if (!srcs[0]) state.event.image = T.clone(T.DEFAULTS.event.image); // картинка не нашлась в браузере
+    state.digest.items.forEach(function (it) { if (it.image && it.image.ref && !T.images.has(it.image.ref)) it.image = null; });
     renderLists(); syncControls(); render();
     refreshHistory();
     window.addEventListener('resize', scheduleRender);

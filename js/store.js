@@ -117,7 +117,6 @@
     if (iso) s.event.date = iso;
     if (c.time) s.event.time = c.time;
     if (c.venue) s.event.venue = c.venue;
-    if (o.info && o.info[1] && o.info[1].b) s.event.city = o.info[1].b;
     if (c.price) s.event.price = String(c.price).replace(/\D/g, '');
     if (c.link) s.event.link = c.link;
     ['hook', 'body', 'why'].forEach(function (k) { if (c[k] != null) s.caption[k] = c[k]; });

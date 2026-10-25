@@ -7,6 +7,7 @@
 <title>Конструктор постов TTS</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%272%27 fill=%27%230D0D0D%27/%3E%3Cpath d=%27M16 10c6 0 11 6 11 6s-5 6-11 6S5 16 5 16s5-6 11-6Z%27 fill=%27%23D6D6D2%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%273%27 fill=%27%230D0D0D%27/%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="ds/ds-smm.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -58,7 +59,16 @@
           <button class="chip" type="button" data-value="frame">Картинка в поле</button>
           <button class="chip" type="button" data-value="band">Картинка полосой</button>
           <button class="chip" type="button" data-value="album">Альбом из 2</button>
+          <button class="chip" type="button" data-value="type">Без картинки</button>
         </div>
+      </div>
+      <div class="field" data-when="layout:type"><span class="label">Свечение</span>
+        <div class="chips" data-chips="glow">
+          <button class="chip" type="button" data-value="beam">Луч</button>
+          <button class="chip" type="button" data-value="depth">Глубина</button>
+          <button class="chip" type="button" data-value="halo">Ореол</button>
+        </div>
+        <p class="hint">Цвет свечения — от жанра. Один цвет на пост.</p>
       </div>
       <div class="field"><span class="label">Формат</span>
         <div class="chips" data-chips="format">
@@ -91,17 +101,14 @@
       <div class="field"><label class="label" for="eTitle">Название</label>
         <input class="input" id="eTitle" data-bind="event.title" maxlength="48" placeholder="Мёртвые души">
         <span class="count" data-count="event.title" data-max="48"></span></div>
-      <div class="field" data-when="type:announce,status"><label class="label" for="eLead">Подводка — одно-два предложения</label>
-        <textarea class="textarea" id="eLead" data-bind="event.lead" maxlength="160" rows="3" placeholder="Кто на сцене и чем вечер особенный"></textarea>
-        <span class="count" data-count="event.lead" data-max="160" data-soft="120"></span></div>
+      <div class="field" data-when="layout:album"><label class="label" for="eLead">Фраза о событии — для слайда деталей</label>
+        <textarea class="textarea" id="eLead" data-bind="event.lead" maxlength="90" rows="2" placeholder="Чем вечер особенный — одним предложением"></textarea>
+        <span class="count" data-count="event.lead" data-max="90"></span></div>
       <div class="row">
         <div class="field"><label class="label" for="eDate">Дата</label><input class="input" type="date" id="eDate" data-bind="event.date"></div>
         <div class="field"><label class="label" for="eTime">Начало</label><input class="input" type="time" id="eTime" data-bind="event.time"></div>
       </div>
-      <div class="row">
-        <div class="field"><label class="label" for="eVenue">Площадка</label><input class="input" id="eVenue" data-bind="event.venue" maxlength="32"></div>
-        <div class="field"><label class="label" for="eCity">Город</label><input class="input" id="eCity" data-bind="event.city" maxlength="24"></div>
-      </div>
+      <div class="field"><label class="label" for="eVenue">Площадка</label><input class="input" id="eVenue" data-bind="event.venue" maxlength="32"></div>
       <div class="row">
         <div class="field"><label class="label" for="ePrice">Цена от, ₽</label><input class="input" id="ePrice" data-bind="event.price" inputmode="numeric" maxlength="9" placeholder="3000"></div>
         <div class="field"><label class="label" for="eAge">Возраст</label>
@@ -122,16 +129,15 @@
       <div class="field" data-when="kind:move"><label class="label" for="cVenue">Новая площадка — если меняется</label>
         <input class="input" id="cVenue" data-bind="change.venue" maxlength="32"></div>
       <div class="field"><label class="label" for="cNote">Что с билетами</label>
-        <textarea class="textarea" id="cNote" data-bind="change.note" maxlength="160" rows="3"></textarea>
+        <textarea class="textarea" id="cNote" data-bind="change.note" maxlength="120" rows="3"></textarea>
         <p class="hint">Пусто — подставится типовой текст. Сверьте его с правилами возврата.</p></div>
     </section>
 
     <section class="sec" data-when="type:digest">
       <h2 class="sec-title"><span class="step">3</span>Подборка</h2>
-      <div class="field"><label class="label" for="dKind">Надзаголовок</label>
-        <input class="input" id="dKind" data-bind="digest.kind" maxlength="32"></div>
       <div class="field"><label class="label" for="dTitle">Заголовок подборки</label>
-        <input class="input" id="dTitle" data-bind="digest.title" maxlength="44"></div>
+        <input class="input" id="dTitle" data-bind="digest.title" maxlength="40"></div>
+      <p class="hint">Превью слева — когда картинка есть у каждого события и событий не больше четырёх. Иначе подборка идёт списком.</p>
       <div id="digestList"></div>
       <button class="btn btn-ghost btn-full" type="button" id="addItem">Добавить событие</button>
       <div class="field" style="margin-top:12px"><label class="label" for="dLink">Общая ссылка на билеты</label>
@@ -169,22 +175,23 @@
       </div>
       <div class="field"><label class="check"><input type="checkbox" data-bind="adv.titleCaps"> Название капсом</label>
         <p class="hint">По правилу 14.3 названия событий пишутся обычным регистром. Капс — только по решению владельца.</p></div>
-      <div class="field"><span class="label">Цвет свечения</span>
-        <div class="chips" data-chips="adv.blobColor">
-          <button class="chip" type="button" data-value="auto">По жанру</button>
-          <button class="chip" type="button" data-value="cool">Синий</button>
-          <button class="chip" type="button" data-value="warm">Тёплый + синий</button>
-          <button class="chip" type="button" data-value="green">Зелёный + синий</button>
-        </div>
-      </div>
-      <div class="field"><span class="label">Сила свечения</span>
-        <div class="chips" data-chips="adv.blobLevel">
+      <div class="field"><span class="label">Свечение</span>
+        <div class="chips" data-chips="adv.fx">
           <button class="chip" type="button" data-value="auto">Авто</button>
           <button class="chip" type="button" data-value="none">Нет</button>
-          <button class="chip" type="button" data-value="soft">Тихо</button>
-          <button class="chip" type="button" data-value="full">Ярко</button>
+          <button class="chip" type="button" data-value="footlight">Рампа</button>
+          <button class="chip" type="button" data-value="beam">Луч</button>
+          <button class="chip" type="button" data-value="depth">Глубина</button>
+          <button class="chip" type="button" data-value="halo">Ореол</button>
         </div>
-        <p class="hint">Авто: «Тихо», у переноса и отмены — «Нет».</p>
+        <p class="hint">Авто: «Рампа» на постах с картинкой, «Глубина» на слайде деталей, выбранное свечение без картинки, у переноса, отмены и подборки — нет.</p>
+      </div>
+      <div class="field"><span class="label">Поля</span>
+        <div class="chips" data-chips="adv.margins">
+          <button class="chip" type="button" data-value="wide">112 px</button>
+          <button class="chip" type="button" data-value="tight">72 px</button>
+        </div>
+        <p class="hint">Стандарт — 112 px. Узкие поля — когда тексту не хватает места.</p>
       </div>
       <div class="field" data-when="layout:band"><span class="label">Логотип на картинке</span>
         <div class="chips" data-chips="adv.logoTone">
@@ -193,24 +200,16 @@
           <button class="chip" type="button" data-value="light">Светлый</button>
         </div>
       </div>
-      <div class="field" data-when="layout:frame,band"><span class="label">Строка данных, колонок</span>
-        <div class="chips" data-chips="adv.infoCount" data-num>
-          <button class="chip" type="button" data-value="0">Нет</button>
-          <button class="chip" type="button" data-value="2">2</button>
-          <button class="chip" type="button" data-value="3">3</button>
-        </div>
-        <label class="check" data-when="infoCount:some"><input type="checkbox" id="customInfo"> Свои подписи и значения</label>
-        <div id="infoList"></div>
-      </div>
-      <div class="field" data-when="layout:album"><label class="label" for="aSub">Строка под названием на обложке</label>
-        <input class="input" id="aSub" data-bind="adv.subline" maxlength="70" data-auto-placeholder="subline"></div>
-      <div class="field" data-when="layout:album"><label class="label" for="aLead">Абзац на слайде деталей</label>
-        <textarea class="textarea" id="aLead" data-bind="adv.detailsLead" maxlength="240" rows="4" data-auto-placeholder="detailsLead"></textarea>
-        <p class="hint">Пусто — берётся подводка.</p></div>
+      <div class="field" data-when="layout:frame,band,album,type"><label class="label" for="aSub">Строка под названием</label>
+        <input class="input" id="aSub" data-bind="adv.subline" maxlength="60" data-auto-placeholder="subline">
+        <p class="hint">Пусто — дата, время и площадка. Одна строка, без города и цены.</p></div>
+      <div class="field" data-when="layout:album"><label class="label" for="aLead">Фраза на слайде деталей</label>
+        <textarea class="textarea" id="aLead" data-bind="adv.detailsLead" maxlength="120" rows="3" data-auto-placeholder="detailsLead"></textarea>
+        <p class="hint">Пусто — берётся фраза о событии.</p></div>
       <div class="field" data-when="layout:album"><label class="check"><input type="checkbox" id="customRows"> Своя таблица на слайде деталей</label>
         <div id="rowsList"></div>
         <button class="btn btn-ghost btn-full" type="button" id="addRow" data-when="customRows:yes">Добавить строку</button></div>
-      <div class="field" data-when="layout:frame,band,change,digest"><label class="label" for="aBars">Палочки слайдов</label>
+      <div class="field" data-when="layout:frame,band,type,change,digest"><label class="label" for="aBars">Палочки слайдов</label>
         <select class="select" id="aBars" data-bind="adv.slides">
           <option value="auto">Нет</option><option value="1/2">1 из 2</option><option value="2/2">2 из 2</option>
           <option value="1/3">1 из 3</option><option value="2/3">2 из 3</option><option value="3/3">3 из 3</option>
@@ -283,6 +282,7 @@
 </main>
 
 <input type="file" id="histFile" accept="image/*" multiple hidden>
+<input type="file" id="itemFile" accept="image/*" hidden>
 <div class="measure" id="measure" aria-hidden="true"></div>
 <div class="offscreen" id="offscreen" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
