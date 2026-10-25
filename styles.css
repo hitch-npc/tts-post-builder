@@ -268,7 +268,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .panel { position: static; max-height: none; border-right: 0; order: 2; padding: 4px 16px 48px; }
   .preview { order: 1; padding: 10px 16px 14px; position: sticky; top: 0; z-index: 10; background: var(--ink); border-bottom: 1px solid var(--n800); gap: 10px; }
   .app-head { position: static; }
-  .mock { max-height: 52vh; overflow-y: auto; }
+  .preview.is-mock { position: static; }
   .tab { padding: 6px 6px; font-size: 10px; letter-spacing: .1em; }
 }
 @media (max-width: 420px) {

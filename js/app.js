@@ -128,6 +128,8 @@
     var isAlbum = current.slides.length > 1;
 
     document.querySelectorAll('.tab').forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-tab') === tab)); });
+    // превью площадок на телефоне показываются целиком, а не в окне с прокруткой
+    $('previewPane').classList.toggle('is-mock', tab !== 'canvas');
     $('slideSwitch').hidden = !(isAlbum && tab === 'canvas');
     document.querySelectorAll('[data-slide]').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-slide') === slideIndex() + 1)); });
 
@@ -316,7 +318,11 @@
       update({ lists: true }); return;
     }
     var tab = e.target.closest('[data-tab]');
-    if (tab) { state.tab = tab.getAttribute('data-tab'); update(); return; }
+    if (tab) {
+      state.tab = tab.getAttribute('data-tab'); update();
+      if (window.matchMedia('(max-width: 900px)').matches) $('previewPane').scrollIntoView({ block: 'start' });
+      return;
+    }
     var sl = e.target.closest('[data-slide]');
     if (sl) { state.slide = +sl.getAttribute('data-slide'); update(); return; }
     var del = e.target.closest('[data-del-item]');
