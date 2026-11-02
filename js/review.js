@@ -4,10 +4,10 @@
   'use strict';
   var T = window.TTS;
   var $ = function (id) { return document.getElementById(id); };
-  var KEY = 'tts-review-r1';
+  var KEY = 'tts-review-r2';
   var env = { src: function () { return 'assets/example.jpg'; }, tone: function () { return 'dark'; } };
   var KINDS = Object.keys(T.ARTS);
-  var HUES = ['cobalt', 'cool', 'violet', 'teal', 'green', 'gold', 'warm', 'red', 'silver'];
+  var HUES = ['cobalt', 'cool', 'violet', 'teal', 'green', 'gold', 'warm', 'silver'];   // красный — только у переноса и отмены
   var FIELD = { auto: 'По теме', paper: 'Бумага', stone: 'Камень', graphite: 'Графит', night: 'Ночь', cobalt: 'Кобальт' };
 
   function st(o) {
@@ -39,7 +39,7 @@
   SETS.push({ id: 'B', title: 'Светлая тема и цвета бренда', note: 'Бумага и белый фон по теме — через одну.', items: b });
   var c = [
     { type: 'change', change: 'move', art: 'silk' }, { type: 'change', change: 'move', art: 'steps', field: 'night' },
-    { type: 'change', change: 'cancel', art: 'smoke' }, { type: 'change', change: 'cancel', art: 'contour', theme: 'light' },
+    { type: 'change', change: 'cancel', art: 'smoke' }, { type: 'change', change: 'cancel', art: 'contour', theme: 'light' }, { type: 'change', change: 'move', art: 'glass', hue: 'red' },
     { type: 'digest', art: 'glass' }, { type: 'digest', art: 'rays', hue: 'violet' }, { type: 'digest', art: 'halftone', theme: 'light' },
     { type: 'video', style: 'poster', art: 'moon' }, { type: 'video', style: 'stack', art: 'chrome', hue: 'gold' },
     { type: 'video', style: 'center', art: 'rays', hue: 'teal' }, { type: 'video', style: 'numeral', art: 'grain', hue: 'cobalt' }
@@ -113,7 +113,7 @@
     if (e.target.closest('#box')) { $('box').hidden = true; $('box').innerHTML = ''; return; }
     if (e.target.closest('#clear')) { votes = {}; save(); sync(); return; }
     if (e.target.closest('#copy')) {
-      var lines = ['Сверка сочетаний r1'];
+      var lines = ['Сверка сочетаний r2'];
       [['ok', 'Допустимо'], ['no', 'Нет']].forEach(function (g) {
         var ids = all.filter(function (o) { return votes[o.id] === g[0]; });
         if (ids.length) lines.push(g[1] + ': ' + ids.map(function (o) { return o.id + ' (' + label(o) + ')'; }).join('; '));

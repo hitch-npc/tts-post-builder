@@ -120,6 +120,7 @@
     if (ART_LAYOUTS[layout] && T.ARTS && T.ARTS[artKind]) {
       // цвет: в расширенном интерфейсе — любой из цветов бренда, иначе по смыслу (жанр, перенос, отмена)
       var pick = state.mode === 'advanced' && state.artHue && state.artHue !== 'auto' ? state.artHue : '';
+      if (pick === 'red' && type !== 'change') pick = '';   // красный — сигнал тревоги, только у переноса и отмены
       s.art = { kind: artKind, seed: state.artSeed || 1, hue: pick || s.hue,
         calm: layout === 'digest' ? 'list' : layout === 'vtype' && s.typeStyle === 'center' ? 'mid' : 'low' };
     }
