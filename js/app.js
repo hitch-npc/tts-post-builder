@@ -47,7 +47,11 @@
     } catch (e) { /* картинка недоступна для чтения — оставляем тёмный логотип */ }
     return (toneCache[key] = L < 0.5 ? 'light' : 'dark');
   }
-  var env = { src: function (ref) { return T.images.src(ref); }, tone: autoTone };
+  var env = {
+    src: function (ref) { return T.images.src(ref); }, tone: autoTone,
+    // размеры фото для коллажа: пока картинка грузится — null, после загрузки макет перерисуется
+    dims: function (src) { var m = imageMeta(src, scheduleRender); return m ? { w: m.w, h: m.h } : null; }
+  };
 
   /* ── вычисления ── */
   var renderQueued = false;
@@ -200,6 +204,7 @@
       : state.type === 'video' ? (state.video.layout === 'band' ? 'band' : 'vtype') : state.layout;
     return {
       mode: state.mode, type: state.type, layout: layout, format: state.format, kind: state.change.kind, style: state.video.style,
+      shape: state.collage.shape, art: state.art || 'glass',
       titleSize: state.adv.titleSize ? 'manual' : 'auto',
       customRows: state.adv.customRows ? 'yes' : 'no',
       exportType: state.adv.exportType
@@ -254,6 +259,10 @@
     $('styleHint').textContent = st ? st.hint : '';
     var e = state.event;
     $('imgInfo').textContent = e.image.ref === 'example' ? 'Сейчас стоит картинка-пример.' : '';
+    ['p1', 'p2'].forEach(function (k) {
+      var im = $('cl' + k.toUpperCase() + 'Img'), src = T.images.src(state.collage[k].ref);
+      if (im.getAttribute('src') !== src) im.setAttribute('src', src);
+    });
   }
   function syncAutoPlaceholders() {
     var e = state.event;
@@ -354,6 +363,17 @@
       if (it.image && it.image.ref && it.image.ref !== 'example') T.images.drop(it.image.ref);
       it.image = null; update({ lists: true }); return;
     }
+    var clb = e.target.closest('[data-cl-img]');
+    if (clb) { clTarget = clb.getAttribute('data-cl-img'); $('clFile').click(); return; }
+    var clr = e.target.closest('[data-cl-reset]');
+    if (clr) {
+      var ck = clr.getAttribute('data-cl-reset'), cold = state.collage[ck].ref;
+      state.collage[ck] = T.clone(T.DEFAULTS.collage[ck]);
+      if (cold && cold !== 'example') T.images.drop(cold);
+      update(); return;
+    }
+    if (e.target.closest('#artNew')) { state.artSeed = 1 + Math.floor(Math.random() * 996); update(); return; }
+    if (e.target.closest('#clTear')) { state.collage.seed = Math.floor(Math.random() * 1e9); update(); return; }
     if (e.target.closest('#histAdd')) { $('histFile').click(); return; }
     if (e.target.closest('#histClear')) {
       if (window.confirm('Убрать из сетки все прошлые посты?')) T.history.clear().then(refreshHistory);
@@ -462,6 +482,21 @@
     }).catch(function (err) { toast(err.message || 'Не получилось открыть файл'); });
   });
 
+  // фото коллажа
+  var clTarget = '';
+  $('clFile').addEventListener('change', function () {
+    var file = this.files && this.files[0], k = clTarget;
+    this.value = '';
+    if (!file || !state.collage[k]) return;
+    toast('Загружаю фото…');
+    T.readImage(file, 2000, 0.9).then(function (r) { return T.images.put(r.data); }).then(function (id) {
+      var old = state.collage[k].ref;
+      state.collage[k] = { ref: id, x: 50, y: 50, zoom: 1 };
+      if (old && old !== 'example') T.images.drop(old);
+      update(); toast('Готово');
+    }).catch(function (err) { toast(err.message || 'Не получилось открыть файл'); });
+  });
+
   /* ── история для сетки Instagram ── */
   function refreshHistory() {
     return T.history.list().then(function (h) { history = h.slice(0, 30); render(); });
@@ -529,6 +564,8 @@
       var r = T.layout(s, i, off, 1);   // та же подгонка, что в предпросмотре, в масштабе 1:1
       if (r.over) throw new Error('текст не помещается на ' + r.over + ' px');
       node = off.firstElementChild;
+      // html-to-image красит фоном из настроек сам холст — берём цвет поля, а не цвет темы
+      o.backgroundColor = getComputedStyle(node).backgroundColor || o.backgroundColor;
       return waitImages(node);
     }).then(function () {
       // Safari иногда рисует первый проход без картинки и шрифтов — первый результат отбрасываем
@@ -561,9 +598,9 @@
   $('resetBtn').addEventListener('click', function () {
     if (!window.confirm('Вернуть пример и сбросить все поля?')) return;
     var keep = { mode: state.mode, ig: state.ig, tab: state.tab, tgTheme: state.tgTheme };
-    var old = state.event.image.ref;
+    var olds = [state.event.image.ref, state.collage.p1.ref, state.collage.p2.ref];
     state = Object.assign(T.clone(T.DEFAULTS), keep);
-    if (old && old !== 'example') T.images.drop(old);
+    olds.forEach(function (r) { if (r && r !== 'example') T.images.drop(r); });
     update({ lists: true });
   });
 
@@ -579,11 +616,13 @@
   $('appLogo').innerHTML = T.logo();
   T.loadState().then(function (s) {
     state = s;
-    var refs = state.digest.items.map(function (it) { return it.image && it.image.ref; }).filter(Boolean);
+    var refs = state.digest.items.map(function (it) { return it.image && it.image.ref; })
+      .concat([state.collage.p1.ref, state.collage.p2.ref]).filter(Boolean);
     return Promise.all([T.images.load(state.event.image.ref)].concat(refs.map(function (r) { return T.images.load(r); })));
   }).then(function (srcs) {
     if (!srcs[0]) state.event.image = T.clone(T.DEFAULTS.event.image); // картинка не нашлась в браузере
     state.digest.items.forEach(function (it) { if (it.image && it.image.ref && !T.images.has(it.image.ref)) it.image = null; });
+    ['p1', 'p2'].forEach(function (k) { if (!state.collage[k].ref || !T.images.has(state.collage[k].ref)) state.collage[k] = T.clone(T.DEFAULTS.collage[k]); });
     renderLists(); syncControls(); render();
     refreshHistory();
     window.addEventListener('resize', scheduleRender);

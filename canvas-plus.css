@@ -168,3 +168,20 @@
 
 /* ───── Обложка видео «кадр сверху» и общий минимализм ───── */
 .smm-band .smm-line:empty { display: none; }
+
+/* ───── Коллаж: два фото в фигуре с объёмом, фон ровный ─────
+   Вертикальная строка — серая, как надзаголовок: кобальт на картинке только у палочки (решение №34). */
+.smm-collage { padding: var(--smm-pt) var(--smm-x) var(--smm-pb); }
+.smm-collage > .smm-head { margin-bottom: 64px; }
+.bx-cl-top { flex: 0 0 auto; position: relative; padding-right: 80px; }
+.bx-cl-side {
+  position: absolute; top: 0; right: 0; writing-mode: vertical-rl; white-space: nowrap; line-height: 1;
+  font-size: var(--smm-fs-caption); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--smm-muted);
+}
+.bx-cl-fig { flex: 1 1 0; min-height: var(--smm-image-min); position: relative; margin: 48px 80px 0 0; }
+.bx-cl-fig > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.bx-cl-foot { flex: 0 0 auto; margin-top: 48px; }
+.bx-cl-foot > .smm-line { margin-top: 0; }
+
+/* ───── Рисунок фона (js/bg.js) — картинка во весь холст под текстом ───── */
+.smm-fx.bx-art { width: 100%; height: 100%; object-fit: cover; display: block; }

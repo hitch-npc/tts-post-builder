@@ -117,6 +117,12 @@
       }
     }
 
+    if (spec.layout === 'collage') {
+      var exN = ['p1', 'p2'].filter(function (k) { var p = state.collage[k]; return !p.ref || p.ref === 'example'; }).length;
+      if (exN === 2) add('warn', 'В коллаже оба фото — примеры. Загрузите два кадра события.');
+      else if (exN) add('warn', 'Одно фото в коллаже — пример. Загрузите второй кадр.');
+    }
+
     var titleLen = String(state.type === 'digest' ? state.digest.title : state.type === 'video' ? state.video.title : e.title).length;
     if (state.type === 'video' && titleLen > 28) add('warn', 'Название обложки — ' + titleLen + ' ' + T.plural(titleLen, ['знак', 'знака', 'знаков']) + '. На сетке профиля читаются 2–4 слова, не больше 28 знаков.');
     else if (titleLen > 32) add('warn', 'Длинное название: ' + titleLen + ' ' + T.plural(titleLen, ['знак', 'знака', 'знаков']) + '. На картинке лучше коротко, подробности — в подводке.');
