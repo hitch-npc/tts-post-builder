@@ -20,6 +20,7 @@
     <button class="seg-btn" type="button" data-set-mode="advanced">Расширенный</button>
   </div>
   <span class="spacer"></span>
+  <a class="btn btn-ghost btn-sm" href="review.html">Сверка</a>
   <a class="btn btn-ghost btn-sm" href="guide.html">Как не надо</a>
   <button class="btn btn-ghost btn-sm" type="button" id="resetBtn">Сбросить</button>
 </header>
@@ -65,37 +66,6 @@
           <button class="chip" type="button" data-value="collage">Коллаж</button>
         </div>
       </div>
-      <div class="field" data-when="layout:type,vtype,change,digest"><span class="label">Рисунок фона</span>
-        <div class="chips" data-chips="art">
-          <button class="chip" type="button" data-value="glass">Рифлёное стекло</button>
-          <button class="chip" type="button" data-value="silk">Шёлк</button>
-          <button class="chip" type="button" data-value="rays">Лучи</button>
-          <button class="chip" type="button" data-value="chrome">Хром</button>
-          <button class="chip" type="button" data-value="moon">Луна</button>
-          <button class="chip" type="button" data-value="smoke">Дым</button>
-          <button class="chip" type="button" data-value="steps">Ступени</button>
-          <button class="chip" type="button" data-value="contour">Изолинии</button>
-          <button class="chip" type="button" data-value="grain">Зерно</button>
-          <button class="chip" type="button" data-value="halftone">Полутон</button>
-          <button class="chip" type="button" data-value="none">Без рисунка</button>
-        </div>
-        <div data-when="art:glass,silk,rays,chrome,moon,smoke,steps,contour,grain,halftone"><button class="btn btn-ghost btn-sm" type="button" id="artNew">Другой рисунок</button>
-        <p class="hint">Тот же вид, новый узор. Цвет — от жанра и фона, низ под текстом приглушён.</p></div>
-      </div>
-      <div class="field" data-when="layout:type,vtype art:none"><span class="label">Свет</span>
-        <div class="chips" data-chips="glow">
-          <button class="chip" type="button" data-value="studio">Студия</button>
-          <button class="chip" type="button" data-value="spot">Прожектор</button>
-          <button class="chip" type="button" data-value="window">Окно</button>
-          <button class="chip" type="button" data-value="edge">Кромка</button>
-          <button class="chip" type="button" data-value="fog">Туман</button>
-          <button class="chip" type="button" data-value="vignette">Виньетка</button>
-          <button class="chip" type="button" data-value="beam">Луч</button>
-          <button class="chip" type="button" data-value="depth">Глубина</button>
-          <button class="chip" type="button" data-value="halo">Ореол</button>
-        </div>
-        <p class="hint">Свет того же цвета, что фон, только светлее — как в фотостудии. Жанр слегка тонирует свет.</p>
-      </div>
       <div class="field"><span class="label">Формат</span>
         <div class="chips" data-chips="format">
           <button class="chip" type="button" data-value="post">Пост 4:5</button>
@@ -120,7 +90,7 @@
         </div>
         <p class="hint">Ровная плоскость цвета, текст подбирается сам. «Ночь» тонирована цветом жанра.</p>
       </div>
-      <div class="field" data-when="type:announce,status,digest,video"><span class="label">Жанр — от него цвет свечения</span>
+      <div class="field" data-when="type:announce,status,digest,video"><span class="label">Жанр — от него цвет рисунка и света</span>
         <div class="chips" data-chips="genre">
           <button class="chip" type="button" data-value="theatre">Театр</button>
           <button class="chip" type="button" data-value="classic">Классика</button>
@@ -128,6 +98,54 @@
           <button class="chip" type="button" data-value="musical">Мюзикл</button>
           <button class="chip" type="button" data-value="other">Другое</button>
         </div>
+      </div>
+      <div class="field" data-when="layout:type,vtype,change,digest"><span class="label">Рисунок фона</span>
+        <div class="chips" data-chips="art">
+          <button class="chip" type="button" data-value="glass">Рифлёное стекло</button>
+          <button class="chip" type="button" data-value="silk">Шёлк</button>
+          <button class="chip" type="button" data-value="rays">Лучи</button>
+          <button class="chip" type="button" data-value="chrome">Хром</button>
+          <button class="chip" type="button" data-value="moon">Луна</button>
+          <button class="chip" type="button" data-value="smoke">Дым</button>
+          <button class="chip" type="button" data-value="steps">Ступени</button>
+          <button class="chip" type="button" data-value="contour">Изолинии</button>
+          <button class="chip" type="button" data-value="grain">Зерно</button>
+          <button class="chip" type="button" data-value="halftone">Полутон</button>
+          <button class="chip" type="button" data-value="none">Без рисунка</button>
+        </div>
+        <div data-when="art:glass,silk,rays,chrome,moon,smoke,steps,contour,grain,halftone"><button class="btn btn-ghost btn-sm" type="button" id="artNew">Другой рисунок</button>
+        <p class="hint">Тот же вид, новый узор. Низ под текстом приглушён, у подборки — весь холст под списком.</p></div>
+        <p class="hint" data-when="type:change">Цвет — по событию: перенос оранжевый, отмена красная.</p>
+        <p class="hint" data-when="type:announce,status,digest,video mode:simple">Цвет — от жанра. Свой цвет — в расширенном интерфейсе.</p>
+      </div>
+      <div class="field" data-when="mode:advanced bg:art"><span class="label">Цвет рисунка</span>
+        <div class="chips" data-chips="artHue">
+          <button class="chip" type="button" data-value="auto">Авто</button>
+          <button class="chip" type="button" data-value="cobalt">Кобальт</button>
+          <button class="chip" type="button" data-value="cool">Синий</button>
+          <button class="chip" type="button" data-value="violet">Фиолетовый</button>
+          <button class="chip" type="button" data-value="teal">Бирюза</button>
+          <button class="chip" type="button" data-value="green">Зелёный</button>
+          <button class="chip" type="button" data-value="gold">Золото</button>
+          <button class="chip" type="button" data-value="warm">Оранжевый</button>
+          <button class="chip" type="button" data-value="red">Красный</button>
+          <button class="chip" type="button" data-value="silver">Серебро</button>
+        </div>
+        <p class="hint">Авто — по смыслу: жанр, у переноса оранжевый, у отмены красный. В серии постов держите один цвет.</p>
+      </div>
+      <div class="field" data-when="layout:type,vtype art:none"><span class="label">Свет — когда без рисунка</span>
+        <div class="chips" data-chips="glow">
+          <button class="chip" type="button" data-value="studio">Студия</button>
+          <button class="chip" type="button" data-value="spot">Прожектор</button>
+          <button class="chip" type="button" data-value="window">Окно</button>
+          <button class="chip" type="button" data-value="edge">Кромка</button>
+          <button class="chip" type="button" data-value="fog">Туман</button>
+          <button class="chip" type="button" data-value="vignette">Виньетка</button>
+          <button class="chip" type="button" data-value="beam">Луч</button>
+          <button class="chip" type="button" data-value="depth">Глубина</button>
+          <button class="chip" type="button" data-value="halo">Ореол</button>
+        </div>
+        <p class="hint">Свет того же цвета, что фон, только светлее — как в фотостудии. Жанр слегка тонирует свет.</p>
       </div>
     </section>
 
@@ -300,7 +318,7 @@
       </div>
       <div class="field"><label class="check"><input type="checkbox" data-bind="adv.titleCaps"> Название капсом</label>
         <p class="hint">По правилу 14.3 названия событий пишутся обычным регистром. Капс — только по решению владельца.</p></div>
-      <div class="field"><span class="label">Свечение</span>
+      <div class="field" data-when="layout:frame,band,album"><span class="label">Свечение на постах с картинкой</span>
         <div class="chips" data-chips="adv.fx">
           <button class="chip" type="button" data-value="auto">Авто</button>
           <button class="chip" type="button" data-value="none">Нет</button>
@@ -315,9 +333,9 @@
           <button class="chip" type="button" data-value="fog">Туман</button>
           <button class="chip" type="button" data-value="vignette">Виньетка</button>
         </div>
-        <p class="hint">Авто: «Рампа» на постах с картинкой, «Глубина» на слайде деталей, выбранное свечение без картинки, у переноса, отмены и подборки — нет.</p>
+        <p class="hint">Авто: «Рампа» на картинке, «Глубина» на слайде деталей. Без картинки фон задаёт раздел «Вид»: рисунок или свет.</p>
       </div>
-      <div class="field"><label class="check"><input type="checkbox" data-bind="adv.grain"> Зерно поверх фона</label>
+      <div class="field" data-when="bg:flat"><label class="check"><input type="checkbox" data-bind="adv.grain"> Зерно поверх фона</label>
         <p class="hint">Включено по умолчанию: тонкая плёнка убирает ступеньки градиента. Выключать — для плоских графических постов.</p></div>
       <div class="field"><span class="label">Поля</span>
         <div class="chips" data-chips="adv.margins">
@@ -342,7 +360,7 @@
       <div class="field" data-when="layout:album"><label class="check"><input type="checkbox" id="customRows"> Своя таблица на слайде деталей</label>
         <div id="rowsList"></div>
         <button class="btn btn-ghost btn-full" type="button" id="addRow" data-when="customRows:yes">Добавить строку</button></div>
-      <div class="field" data-when="layout:frame,band,type,change,digest,vtype"><label class="label" for="aBars">Палочки слайдов</label>
+      <div class="field" data-when="layout:frame,band,type,change,digest,vtype,collage"><label class="label" for="aBars">Палочки слайдов</label>
         <select class="select" id="aBars" data-bind="adv.slides">
           <option value="auto">Нет</option><option value="1/2">1 из 2</option><option value="2/2">2 из 2</option>
           <option value="1/3">1 из 3</option><option value="2/3">2 из 3</option><option value="3/3">3 из 3</option>

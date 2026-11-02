@@ -205,6 +205,7 @@
     return {
       mode: state.mode, type: state.type, layout: layout, format: state.format, kind: state.change.kind, style: state.video.style,
       shape: state.collage.shape, art: state.art || 'glass',
+      bg: { type: 1, vtype: 1, change: 1, digest: 1 }[layout] && (state.art || 'glass') !== 'none' ? 'art' : 'flat',
       titleSize: state.adv.titleSize ? 'manual' : 'auto',
       customRows: state.adv.customRows ? 'yes' : 'no',
       exportType: state.adv.exportType
@@ -251,7 +252,7 @@
     $('typeHint').textContent = {
       announce: 'Новое событие: название и одна строка — когда и где. Остальное — в тексте поста.',
       status: 'Тот же анонс с меткой над названием: старт продаж, мало мест или последние билеты.',
-      change: 'Служебный пост без картинки и свечения: новая дата и что делать с билетами.',
+      change: 'Служебный пост без картинки: новая дата и что делать с билетами. Перенос — оранжевый, отмена — красная.',
       digest: '3–5 событий одним списком. Картинки у событий — по желанию: превью слева.',
       video: 'Обложка для рилс, сторис и видео в канале: рубрика, название и одна строка. Крупно и тихо — в сетке профиля она размером с ноготь.'
     }[state.type];

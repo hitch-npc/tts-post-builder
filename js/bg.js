@@ -166,13 +166,33 @@ void main(){float U=R.x*1.25;vec2 p=vec2(gl_FragCoord.x,gl_FragCoord.y-(R.y-U))/
  o=vec4(toSrgb(lab2rgb(ramp(t+g*GR))),1.);}`;
 
   // Шкала: фон поля → самый сильный тон. Тёмная — из --blob-* и подписей тегов, светлая — пастель темы.
+  // Цвета бренда сверх жанровых: кобальт, «Рампа»-фиолетовый, зоны схемы зала (бирюза, золото), красный тегов, серебро-stone.
   var RAMP = {
-    dark:  { cool: ['#15092A', '#06277F', '#3F73E3', '#A3BCFF'], warm: ['#2A1200', '#4A1F00', '#C2410C', '#FB923C'], green: ['#051205', '#0A2A0A', '#16A34A', '#4ADE80'] },
-    light: { cool: ['#EAF0FF', '#BFD0EE', '#7A9FFF', '#0436B6'], warm: ['#F2DCC0', '#F2D5B0', '#FB923C', '#C2410C'], green: ['#E4F3E4', '#C7E8C8', '#4ADE80', '#16A34A'] }
+    dark: {
+      cool:   ['#15092A', '#06277F', '#3F73E3', '#A3BCFF'],
+      warm:   ['#2A1200', '#4A1F00', '#C2410C', '#FB923C'],
+      green:  ['#051205', '#0A2A0A', '#16A34A', '#4ADE80'],
+      red:    ['#220A0A', '#4A0A0A', '#DC2626', '#F87171'],
+      cobalt: ['#08133D', '#0436B6', '#0047FF', '#A3BCFF'],
+      violet: ['#15092A', '#200840', '#7A4DFF', '#C4B0FF'],
+      teal:   ['#04181B', '#0A3A40', '#2BA7B8', '#A6E4EC'],
+      gold:   ['#1A1206', '#3D2A10', '#C9975A', '#F0D7B0'],
+      silver: ['#111318', '#262930', '#808174', '#D6D6D2']
+    },
+    light: {
+      cool:   ['#EAF0FF', '#BFD0EE', '#7A9FFF', '#0436B6'],
+      warm:   ['#F2DCC0', '#F2D5B0', '#FB923C', '#C2410C'],
+      green:  ['#E4F3E4', '#C7E8C8', '#4ADE80', '#16A34A'],
+      red:    ['#FEE2E2', '#FCA5A5', '#F87171', '#DC2626'],
+      cobalt: ['#EAF0FF', '#B8C9F0', '#7A9FFF', '#0436B6'],
+      violet: ['#F1EBFF', '#DBC4F0', '#A98BFF', '#5B2FD6'],
+      teal:   ['#E3F5F7', '#B4E3E9', '#5CC3D0', '#17707C'],
+      gold:   ['#F7EEDF', '#EBD6B4', '#D9AE78', '#8A6430'],
+      silver: ['#F2F1EB', '#E2E1DA', '#A8A8A5', '#4A4A48']
+    }
   };
   // цвет поля — первая ступень шкалы; совпадает с --smm-bg холста, чтобы текст оставался читаемым
   var FIELD_BG = { paper: '#ECE8DD', stone: '#C6C5BD', graphite: '#1D1E21' };
-  var HUE_DARK = { cool: '#06277F', warm: '#4A1F00', green: '#0A2A0A' };
 
   function lin(c) { c /= 255; return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); }
   function oklab(hex) {
@@ -186,7 +206,7 @@ void main(){float U=R.x*1.25;vec2 p=vec2(gl_FragCoord.x,gl_FragCoord.y-(R.y-U))/
     if (o.field === 'cobalt') return ['#0047FF', '#1F5BFF', '#4C7DFF', '#9DB6FF', '#FFFFFF'].map(oklab);
     var dark = o.theme !== 'light', hue = RAMP.dark[o.hue] ? o.hue : 'cool';
     var steps = RAMP[dark ? 'dark' : 'light'][hue].map(oklab), bg;
-    if (o.field === 'night') bg = mixLab(oklab('#060709'), oklab(HUE_DARK[hue]), .34);   // как color-mix у поля «Ночь»
+    if (o.field === 'night') bg = mixLab(oklab('#060709'), oklab(RAMP.dark[hue][1]), .34);   // как color-mix у поля «Ночь»
     else bg = oklab(FIELD_BG[o.field] || (dark ? '#0D0D0D' : '#F2F1EB'));
     return [bg].concat(steps);
   }
@@ -241,4 +261,7 @@ void main(){float U=R.x*1.25;vec2 p=vec2(gl_FragCoord.x,gl_FragCoord.y-(R.y-U))/
     return url;
   };
   T.artSupported = function () { return init(); };
+  // цвета рисунка на выбор; «Авто» — по жанру, у переноса оранжевый, у отмены красный
+  T.ART_HUES = { auto: 'Авто', cobalt: 'Кобальт', cool: 'Синий', violet: 'Фиолетовый', teal: 'Бирюза', green: 'Зелёный',
+    gold: 'Золото', warm: 'Оранжевый', red: 'Красный', silver: 'Серебро' };
 })();

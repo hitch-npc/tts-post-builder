@@ -185,3 +185,7 @@
 
 /* ───── Рисунок фона (js/bg.js) — картинка во весь холст под текстом ───── */
 .smm-fx.bx-art { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* отмена — красный тон холста (поле «Ночь» и свет берут его из --smm-hue) */
+.smm-canvas--red { --smm-hue: #4A0A0A; }
+.smm-canvas--light.smm-canvas--red { --smm-hue: #FCA5A5; }

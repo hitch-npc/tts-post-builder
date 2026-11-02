@@ -107,6 +107,7 @@
     glow: 'studio',
     art: 'glass',            // рисунок фона без картинки (T.ARTS); 'none' — вернуть свечение
     artSeed: 1,              // номер узора: «Другой рисунок» меняет его
+    artHue: 'auto',          // цвет рисунка (T.ART_HUES); выбор — только в расширенном интерфейсе
     field: 'auto',
     status: 'start',
     event: {

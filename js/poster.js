@@ -32,7 +32,9 @@
     var s = {
       type: type, layout: layout, format: f, H: T.FORMATS[f].h,
       x: X, pt: story ? T.STORY_PAD.top : X, pb: story ? T.STORY_PAD.bottom : X, wide: wide,
-      theme: state.theme, hue: (T.GENRES[state.genre] || T.GENRES.other).hue,
+      theme: state.theme,
+      // перенос — оранжевый (как тег «Мало мест»), отмена — красный; остальное — по жанру
+      hue: type === 'change' ? (state.change.kind === 'cancel' ? 'red' : 'warm') : (T.GENRES[state.genre] || T.GENRES.other).hue,
       kind: ty(e.kind), title: ty(e.title), caps: !!a.titleCaps,
       titleSize: a.titleSize || 0,
       line: [when, ty(e.venue)].filter(Boolean).join(' · '),
@@ -116,12 +118,16 @@
     var artKind = state.art || 'glass';
     var ART_LAYOUTS = { type: 1, vtype: 1, change: 1, digest: 1 };
     if (ART_LAYOUTS[layout] && T.ARTS && T.ARTS[artKind]) {
-      s.art = { kind: artKind, seed: state.artSeed || 1,
+      // цвет: в расширенном интерфейсе — любой из цветов бренда, иначе по смыслу (жанр, перенос, отмена)
+      var pick = state.mode === 'advanced' && state.artHue && state.artHue !== 'auto' ? state.artHue : '';
+      s.art = { kind: artKind, seed: state.artSeed || 1, hue: pick || s.hue,
         calm: layout === 'digest' ? 'list' : layout === 'vtype' && s.typeStyle === 'center' ? 'mid' : 'low' };
     }
     function fxFor(kind) {
       if (s.art && ART_LAYOUTS[kind]) return 'none';
-      return s.manualFx && s.manualFx !== 'auto' && T.FX[s.manualFx] ? s.manualFx : autoFx(kind);
+      // ручное свечение — только для постов с картинкой; без картинки свет выбирается в разделе «Вид»
+      var manual = kind !== 'type' && kind !== 'vtype' && s.manualFx && s.manualFx !== 'auto' && T.FX[s.manualFx];
+      return manual ? s.manualFx : autoFx(kind);
     }
 
     if (layout === 'vtype') {
@@ -191,7 +197,7 @@
   // слой рисунка: картинка из шейдера, класс smm-fx — чтобы лечь под текст, как свечение
   function art(s) {
     if (!s.art || !T.artUrl) return '';
-    var url = T.artUrl({ kind: s.art.kind, seed: s.art.seed, theme: s.theme, hue: s.hue, field: s.field, w: 1080, h: s.H, calm: s.art.calm });
+    var url = T.artUrl({ kind: s.art.kind, seed: s.art.seed, theme: s.theme, hue: s.art.hue, field: s.field, w: 1080, h: s.H, calm: s.art.calm });
     return url ? '<img class="smm-fx bx-art" src="' + url + '" alt="">' : '';
   }
 
