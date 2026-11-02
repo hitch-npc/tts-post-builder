@@ -4,11 +4,11 @@
   'use strict';
   var T = window.TTS;
   var $ = function (id) { return document.getElementById(id); };
-  var KEY = 'tts-review-r2';
+  var KEY = 'tts-review-r3';
   var env = { src: function () { return 'assets/example.jpg'; }, tone: function () { return 'dark'; } };
   var KINDS = Object.keys(T.ARTS);
   var HUES = ['cobalt', 'cool', 'violet', 'teal', 'green', 'gold', 'warm', 'silver'];   // красный — только у переноса и отмены
-  var MARKS = { invert: 'инверсия', art: 'как рисунок', cobalt: 'кобальт', violet: 'фиолетовый', teal: 'бирюза', green: 'зелёный', gold: 'золото', warm: 'оранжевый', red: 'красный' };
+  var MARKS = { invert: 'инверсия', art: 'как рисунок', accent: 'кобальт', green: 'зелёный', orange: 'оранжевый', red: 'красный', default: 'нейтральный' };
   var FIELD = { auto: 'По теме', paper: 'Бумага', stone: 'Камень', graphite: 'Графит', night: 'Ночь', cobalt: 'Кобальт' };
 
   function st(o) {
@@ -49,13 +49,13 @@
   var d = [
     { type: 'change', change: 'move', art: 'silk', mark: 'invert' }, { type: 'change', change: 'move', art: 'silk', mark: 'art' },
     { type: 'change', change: 'cancel', art: 'smoke', mark: 'art' }, { type: 'change', change: 'move', art: 'glass', theme: 'light', mark: 'art' },
-    { type: 'status', art: 'rays', mark: 'cobalt' }, { type: 'status', art: 'rays', mark: 'violet', hue: 'violet' },
-    { type: 'status', art: 'moon', mark: 'teal', hue: 'teal' }, { type: 'status', art: 'contour', mark: 'green', genre: 'musical' },
-    { type: 'status', art: 'steps', mark: 'gold', hue: 'gold' }, { type: 'status', art: 'glass', mark: 'warm', genre: 'opera' },
-    { type: 'status', art: 'silk', mark: 'cobalt', theme: 'light' }, { type: 'status', layout: 'frame', mark: 'cobalt' }
+    { type: 'status', art: 'rays', mark: 'accent' }, { type: 'status', art: 'rays', mark: 'art', hue: 'violet' },
+    { type: 'status', art: 'moon', mark: 'default', hue: 'teal' }, { type: 'status', art: 'contour', mark: 'green', genre: 'musical' },
+    { type: 'status', art: 'steps', mark: 'invert', hue: 'gold' }, { type: 'status', art: 'glass', mark: 'orange', genre: 'opera' },
+    { type: 'status', art: 'silk', mark: 'accent', theme: 'light' }, { type: 'status', layout: 'frame', mark: 'accent' }
   ];
   SETS.push({ id: 'C', title: 'Типы постов', note: 'Перенос и отмена — свой цвет по смыслу; подборка и обложки видео — с цветами бренда.', items: c });
-  SETS.push({ id: 'D', title: 'Цвет метки', note: 'Метка над названием: инверсия, в цвет рисунка или цвет бренда.', items: d });
+  SETS.push({ id: 'D', title: 'Цвет метки', note: 'Метка над названием: инверсия или тег ядра — кобальт, зелёный, оранжевый, красный, нейтральный.', items: d });
 
   var votes = {};
   try { votes = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { votes = {}; }
@@ -124,7 +124,7 @@
     if (e.target.closest('#box')) { $('box').hidden = true; $('box').innerHTML = ''; return; }
     if (e.target.closest('#clear')) { votes = {}; save(); sync(); return; }
     if (e.target.closest('#copy')) {
-      var lines = ['Сверка сочетаний r2'];
+      var lines = ['Сверка сочетаний r3'];
       [['ok', 'Допустимо'], ['no', 'Нет']].forEach(function (g) {
         var ids = all.filter(function (o) { return votes[o.id] === g[0]; });
         if (ids.length) lines.push(g[1] + ': ' + ids.map(function (o) { return o.id + ' (' + label(o) + ')'; }).join('; '));

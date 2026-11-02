@@ -58,8 +58,9 @@
     if (type === 'status') s.mark = T.STATUSES[state.status].name;
     if (type === 'change') s.mark = T.CHANGES[state.change.kind].name;
     // цвет метки: инверсия по умолчанию; «как рисунок» берёт цвет рисунка или жанра; красный — только у переноса и отмены
-    var mc = state.markColor || 'invert';
-    if (mc === 'red' && type !== 'change') mc = 'invert';
+    // только теги ядра: accent, green, orange, red, default; старые значения приводятся к ним
+    var mc = { cobalt: 'accent', warm: 'orange' }[state.markColor] || state.markColor || 'invert';
+    if (T.MARK_COLORS.indexOf(mc) === -1 || (mc === 'red' && type !== 'change')) mc = 'invert';
     s.markColor = mc;
 
     // слайд деталей альбома: одна фраза и пункты в одну строку
@@ -130,7 +131,8 @@
     }
     if (s.markColor === 'art') {
       var mh = (s.art && s.art.hue) || s.hue;
-      s.markColor = { cool: 'cobalt', silver: 'invert' }[mh] || mh;
+      // ближайший тег ядра; у цветов без своего тега (фиолетовый, бирюза, золото, серебро) — инверсия
+      s.markColor = { cool: 'accent', cobalt: 'accent', green: 'green', warm: 'orange', red: 'red' }[mh] || 'invert';
     }
     function fxFor(kind) {
       if (s.art && ART_LAYOUTS[kind]) return 'none';

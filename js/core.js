@@ -76,6 +76,9 @@
   T.VT_LINES = { poster: 3, stack: 5, contrast: 4, center: 3, numeral: 3 };
 
   // Настройки «Расширенного» режима. В «Простом» всегда действуют эти значения — так держится стандарт.
+  // цвета метки — только теги ядра DS: .tag-accent, -green, -orange, -red, -default
+  T.MARK_COLORS = ['invert', 'art', 'accent', 'green', 'orange', 'red', 'default'];
+
   T.ADV_DEFAULTS = {
     titleSize: 0,            // 0 — авто по шкале SMM, название не больше двух строк
     titleCaps: false,
@@ -107,7 +110,7 @@
     glow: 'studio',
     art: 'glass',            // рисунок фона без картинки (T.ARTS); 'none' — вернуть свечение
     artSeed: 1,              // номер узора: «Другой рисунок» меняет его
-    markColor: 'invert',     // метка статуса: invert — инверсия, art — цвет рисунка, или цвет бренда
+    markColor: 'invert',     // метка статуса: invert — инверсия, art — как рисунок, или тег ядра (T.MARK_COLORS)
     artHue: 'auto',          // цвет рисунка (T.ART_HUES); выбор — только в расширенном интерфейсе
     field: 'auto',
     status: 'start',

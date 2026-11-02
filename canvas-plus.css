@@ -190,11 +190,24 @@
 .smm-canvas--red { --smm-hue: #4A0A0A; }
 .smm-canvas--light.smm-canvas--red { --smm-hue: #FCA5A5; }
 
-/* метка статуса в цвете: фон — цвет бренда, текст — белый или чернила по контрасту */
-.smm-canvas.bx-mark-cobalt .smm-mark { background: #0047FF; color: #FFFFFF; }
-.smm-canvas.bx-mark-violet .smm-mark { background: #7A4DFF; color: #FFFFFF; }
-.smm-canvas.bx-mark-teal   .smm-mark { background: #2BA7B8; color: #0D0D0D; }
-.smm-canvas.bx-mark-green  .smm-mark { background: #22C55E; color: #0D0D0D; }
-.smm-canvas.bx-mark-gold   .smm-mark { background: #C9975A; color: #0D0D0D; }
-.smm-canvas.bx-mark-warm   .smm-mark { background: #FB923C; color: #0D0D0D; }
-.smm-canvas.bx-mark-red    .smm-mark { background: #DC2626; color: #FFFFFF; }
+/* метка статуса — только теги ядра (.tag-accent / -green / -orange / -red / -default из ds-core-r14*.css).
+   Значения — из tokens.json, тёмная и светлая тема; ivory-тег не используется: он только для Premium. */
+.smm-canvas {
+  --tag-accent-bg: #0B142A; --tag-accent-fg: #7A9FFF; --tag-accent-bd: #091E56;
+  --tag-g-bg: #0A2210; --tag-g-fg: #4ADE80; --tag-g-bd: #1A4428;
+  --tag-o-bg: #221408; --tag-o-fg: #FB923C; --tag-o-bd: #442810;
+  --tag-r-bg: #220A0A; --tag-r-fg: #F87171; --tag-r-bd: #441414;
+  --tag-d-bg: #191C22; --tag-d-fg: #8A8A88; --tag-d-bd: #262930;
+}
+.smm-canvas--light {
+  --tag-accent-bg: #EAF0FF; --tag-accent-fg: #0436B6; --tag-accent-bd: #B8C9F0;
+  --tag-g-bg: #DCFCE7; --tag-g-fg: #16A34A; --tag-g-bd: #86EFAC;
+  --tag-o-bg: #FFEDD5; --tag-o-fg: #C2410C; --tag-o-bd: #FED7AA;
+  --tag-r-bg: #FEE2E2; --tag-r-fg: #DC2626; --tag-r-bd: #FCA5A5;
+  --tag-d-bg: #F2F1EB; --tag-d-fg: #6A6A68; --tag-d-bd: #E2E1DA;
+}
+.smm-canvas.bx-mark-accent  .smm-mark { background: var(--tag-accent-bg); color: var(--tag-accent-fg); box-shadow: inset 0 0 0 2px var(--tag-accent-bd); }
+.smm-canvas.bx-mark-green   .smm-mark { background: var(--tag-g-bg); color: var(--tag-g-fg); box-shadow: inset 0 0 0 2px var(--tag-g-bd); }
+.smm-canvas.bx-mark-orange  .smm-mark { background: var(--tag-o-bg); color: var(--tag-o-fg); box-shadow: inset 0 0 0 2px var(--tag-o-bd); }
+.smm-canvas.bx-mark-red     .smm-mark { background: var(--tag-r-bg); color: var(--tag-r-fg); box-shadow: inset 0 0 0 2px var(--tag-r-bd); }
+.smm-canvas.bx-mark-default .smm-mark { background: var(--tag-d-bg); color: var(--tag-d-fg); box-shadow: inset 0 0 0 2px var(--tag-d-bd); }
