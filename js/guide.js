@@ -12,6 +12,7 @@
   function base(mut) {
     var s = T.clone(T.DEFAULTS);
     s.mode = 'advanced';
+    s.art = 'none';   // примеры справочника — про свет и вёрстку, рисунок фона их бы перекрыл
     if (mut) mut(s);
     return s;
   }

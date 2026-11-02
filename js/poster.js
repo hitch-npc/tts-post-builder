@@ -8,7 +8,7 @@
   var esc = T.esc, br = T.br, fmt = T.fmt;
 
   // Кегль названия по шкале smm.tokens.json
-  var BASE = { frame: 118, band: 118, cover: 118, details: 102, change: 94, digest: 94, type: 150, vtype: 118 };
+  var BASE = { frame: 118, band: 118, cover: 118, details: 102, change: 94, digest: 94, type: 150, vtype: 118, collage: 102 };
   var NB = ' ';
 
   /* ── спека: всё, что нужно холсту, уже посчитано и выверено ── */
@@ -76,6 +76,20 @@
         note: ty(c.note || T.CHANGES[c.kind].note)
       };
     }
+    if (layout === 'collage') {
+      var cl = state.collage;
+      var pic = function (p) {
+        var src = p && p.ref && env && env.src ? env.src(p.ref) : '';
+        var dm = src && env && env.dims ? env.dims(src) : null;
+        return { src: src, x: p ? p.x : 50, y: p ? p.y : 50, zoom: p ? p.zoom : 1, w: dm ? dm.w : 0, h: dm ? dm.h : 0 };
+      };
+      // разрыв билета зависит от названия — у каждого события свой; «Другой разрыв» сдвигает номер
+      s.collage = {
+        shape: T.SHAPES[cl.shape] ? cl.shape : 'ticket', depth: cl.depth,
+        seed: (T.hashStr(e.title) + (cl.seed || 0)) >>> 0, side: ty(cl.side),
+        p1: pic(cl.p1), p2: pic(cl.p2)
+      };
+    }
     if (type === 'digest') {
       var d = state.digest;
       s.title = ty(d.title); s.age = '';
@@ -94,10 +108,19 @@
     function autoFx(kind) {
       if (kind === 'type' || kind === 'vtype') return T.FX[state.glow] ? state.glow : 'studio';
       if (kind === 'details') return 'depth';
+      if (kind === 'collage') return 'none';   // коллаж — на ровном фоне, свет спорит с объёмом фигуры
       if (kind === 'frame' || kind === 'band' || kind === 'cover') return 'footlight';
       return 'none';
     }
-    function fxFor(kind) { return s.manualFx && s.manualFx !== 'auto' && T.FX[s.manualFx] ? s.manualFx : autoFx(kind); }
+    // рисунок фона — у постов без картинки и обложек видео; вместо свечения
+    var artKind = state.art || 'glass';
+    if ((layout === 'type' || layout === 'vtype') && T.ARTS && T.ARTS[artKind]) {
+      s.art = { kind: artKind, seed: state.artSeed || 1, center: layout === 'vtype' && s.typeStyle === 'center' };
+    }
+    function fxFor(kind) {
+      if (s.art && (kind === 'type' || kind === 'vtype')) return 'none';
+      return s.manualFx && s.manualFx !== 'auto' && T.FX[s.manualFx] ? s.manualFx : autoFx(kind);
+    }
 
     if (layout === 'vtype') {
       s.slides = [{ kind: 'vtype', bars: '', fx: fxFor('vtype') }];
@@ -161,7 +184,13 @@
     return ['smm-canvas', 'smm-canvas--' + s.format, s.theme === 'light' ? 'smm-canvas--light' : '',
       s.hue !== 'cool' ? 'smm-canvas--' + s.hue : '', s.wide ? '' : 'smm-canvas--tight',
       'bx-tf-' + s.titleFont, s.density ? 'bx-d' + s.density : '', s.field !== 'auto' ? 'bx-field-' + s.field : '',
-      s.grain ? 'bx-grain' : '', layout].filter(Boolean).join(' ');
+      s.grain && !s.art ? 'bx-grain' : '', layout].filter(Boolean).join(' ');
+  }
+  // слой рисунка: картинка из шейдера, класс smm-fx — чтобы лечь под текст, как свечение
+  function art(s) {
+    if (!s.art || !T.artUrl) return '';
+    var url = T.artUrl({ kind: s.art.kind, seed: s.art.seed, theme: s.theme, hue: s.hue, field: s.field, w: 1080, h: s.H, center: s.art.center });
+    return url ? '<img class="smm-fx bx-art" src="' + url + '" alt="">' : '';
   }
 
   /* ── слайды ── */
@@ -221,13 +250,22 @@
         '<div class="smm-grid' + (s.thumbs ? ' smm-dg-thumbs' : '') + '" data-limit="' + lim + '">' + title(s, ts, ' smm-span') +
           '<div class="smm-gap"></div>' + items + '</div></div>';
     }
+    if (k === 'collage') {
+      // сверху надзаголовок и название, справа вертикальная строка, посередине фигура, внизу «когда и где»
+      var c = s.collage;
+      return '<div class="' + canvasClass(s, 'smm-collage') + '">' + fx(sl.fx) + head(s, sl.bars) +
+        '<div class="smm-text bx-cl-top">' + kicker(s) + title(s, ts) +
+          (c.side ? '<span class="bx-cl-side">' + esc(c.side) + '</span>' : '') + '</div>' +
+        '<div class="bx-cl-fig">' + T.collageSvg(c) + '</div>' +
+        '<div class="bx-cl-foot" data-limit="' + lim + '">' + line(s.subline) + '</div></div>';
+    }
     if (k === 'vtype') {
       var numeral = s.typeStyle === 'numeral' && s.num ? '<div class="bx-numeral" aria-hidden="true">' + nums(s, s.num) + '</div>' : '';
-      return '<div class="' + canvasClass(s, 'smm-sheet smm-vt smm-vt--' + s.typeStyle) + '">' + fx(sl.fx) + head(s, sl.bars) +
+      return '<div class="' + canvasClass(s, 'smm-sheet smm-vt smm-vt--' + s.typeStyle) + '">' + art(s) + fx(sl.fx) + head(s, sl.bars) +
         '<div class="smm-text" data-limit="' + lim + '" style="--bx-ts:' + ts + 'px">' + kicker(s) + numeral + title(s, ts) + line(s.subline) + '</div></div>';
     }
-    // type — без картинки, крупное название на свечении
-    return '<div class="' + canvasClass(s, 'smm-sheet smm-type') + '">' + fx(sl.fx) + head(s, sl.bars) +
+    // type — без картинки, крупное название на рисунке или свечении
+    return '<div class="' + canvasClass(s, 'smm-sheet smm-type') + '">' + art(s) + fx(sl.fx) + head(s, sl.bars) +
       '<div class="smm-text" data-limit="' + lim + '">' + kicker(s) + title(s, ts) + line(s.subline) + '</div></div>';
   };
 

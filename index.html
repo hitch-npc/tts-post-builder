@@ -62,9 +62,27 @@
           <button class="chip" type="button" data-value="band">Картинка полосой</button>
           <button class="chip" type="button" data-value="album">Альбом из 2</button>
           <button class="chip" type="button" data-value="type">Без картинки</button>
+          <button class="chip" type="button" data-value="collage">Коллаж</button>
         </div>
       </div>
-      <div class="field" data-when="layout:type,vtype"><span class="label">Свет</span>
+      <div class="field" data-when="layout:type,vtype"><span class="label">Рисунок фона</span>
+        <div class="chips" data-chips="art">
+          <button class="chip" type="button" data-value="glass">Рифлёное стекло</button>
+          <button class="chip" type="button" data-value="silk">Шёлк</button>
+          <button class="chip" type="button" data-value="rays">Лучи</button>
+          <button class="chip" type="button" data-value="chrome">Хром</button>
+          <button class="chip" type="button" data-value="moon">Луна</button>
+          <button class="chip" type="button" data-value="smoke">Дым</button>
+          <button class="chip" type="button" data-value="steps">Ступени</button>
+          <button class="chip" type="button" data-value="contour">Изолинии</button>
+          <button class="chip" type="button" data-value="grain">Зерно</button>
+          <button class="chip" type="button" data-value="halftone">Полутон</button>
+          <button class="chip" type="button" data-value="none">Без рисунка</button>
+        </div>
+        <div data-when="art:glass,silk,rays,chrome,moon,smoke,steps,contour,grain,halftone"><button class="btn btn-ghost btn-sm" type="button" id="artNew">Другой рисунок</button>
+        <p class="hint">Тот же вид, новый узор. Цвет — от жанра и фона, низ под текстом приглушён.</p></div>
+      </div>
+      <div class="field" data-when="layout:type,vtype art:none"><span class="label">Свет</span>
         <div class="chips" data-chips="glow">
           <button class="chip" type="button" data-value="studio">Студия</button>
           <button class="chip" type="button" data-value="spot">Прожектор</button>
@@ -193,6 +211,46 @@
         <input class="input" id="vLine" data-bind="video.line" maxlength="40" placeholder="Репетиция · 2 мин"></div>
       <div class="field"><label class="label" for="vLink">Ссылка на билеты</label>
         <input class="input" type="url" id="vLink" data-bind="event.link" placeholder="https://"></div>
+    </section>
+
+    <section class="sec" data-when="layout:collage">
+      <h2 class="sec-title"><span class="step">4</span>Коллаж</h2>
+      <div class="field"><span class="label">Фигура</span>
+        <div class="chips" data-chips="collage.shape">
+          <button class="chip" type="button" data-value="ticket">Разорванный билет</button>
+          <button class="chip" type="button" data-value="tt">Т и перевёрнутая Т</button>
+          <button class="chip" type="button" data-value="portal">Портал и сцена</button>
+        </div>
+        <div class="btns" data-when="shape:ticket" style="margin-top:10px">
+          <button class="btn btn-ghost btn-sm" type="button" id="clTear">Другой разрыв</button>
+        </div>
+      </div>
+      <div class="field"><label class="label" for="clDepth">Объём</label>
+        <div class="range"><input type="range" id="clDepth" min="0" max="48" step="1" data-bind="collage.depth" data-num><output data-out="collage.depth"></output></div></div>
+      <div class="field"><label class="label" for="clSide">Строка сбоку, вертикально</label>
+        <input class="input" id="clSide" data-bind="collage.side" maxlength="40" placeholder="Необязательно"></div>
+      <input type="file" id="clFile" accept="image/*" hidden>
+      <div class="list-item">
+        <div class="list-item-head"><span class="label">Фото 1 — верхняя часть</span><button class="link-btn" type="button" data-cl-reset="p1">Пример</button></div>
+        <div class="item-img"><img id="clP1Img" alt=""><button class="btn btn-ghost btn-sm" type="button" data-cl-img="p1">Загрузить фото</button></div>
+        <div class="field"><label class="label" for="clP1Z">Масштаб</label>
+          <div class="range"><input type="range" id="clP1Z" min="1" max="3" step="0.05" data-bind="collage.p1.zoom" data-num><output data-out="collage.p1.zoom"></output></div></div>
+        <div class="field"><label class="label" for="clP1X">Влево — вправо</label>
+          <div class="range"><input type="range" id="clP1X" min="0" max="100" step="1" data-bind="collage.p1.x" data-num><output data-out="collage.p1.x"></output></div></div>
+        <div class="field"><label class="label" for="clP1Y">Вверх — вниз</label>
+          <div class="range"><input type="range" id="clP1Y" min="0" max="100" step="1" data-bind="collage.p1.y" data-num><output data-out="collage.p1.y"></output></div></div>
+      </div>
+      <div class="list-item">
+        <div class="list-item-head"><span class="label">Фото 2 — нижняя часть</span><button class="link-btn" type="button" data-cl-reset="p2">Пример</button></div>
+        <div class="item-img"><img id="clP2Img" alt=""><button class="btn btn-ghost btn-sm" type="button" data-cl-img="p2">Загрузить фото</button></div>
+        <div class="field"><label class="label" for="clP2Z">Масштаб</label>
+          <div class="range"><input type="range" id="clP2Z" min="1" max="3" step="0.05" data-bind="collage.p2.zoom" data-num><output data-out="collage.p2.zoom"></output></div></div>
+        <div class="field"><label class="label" for="clP2X">Влево — вправо</label>
+          <div class="range"><input type="range" id="clP2X" min="0" max="100" step="1" data-bind="collage.p2.x" data-num><output data-out="collage.p2.x"></output></div></div>
+        <div class="field"><label class="label" for="clP2Y">Вверх — вниз</label>
+          <div class="range"><input type="range" id="clP2Y" min="0" max="100" step="1" data-bind="collage.p2.y" data-num><output data-out="collage.p2.y"></output></div></div>
+      </div>
+      <p class="hint">Фон коллажа ровный, без света: объём фигуры и так держит пост.</p>
     </section>
 
     <section class="sec" data-when="layout:frame,band,album">
@@ -365,6 +423,8 @@
 <script src="vendor/html-to-image.js"></script>
 <script src="js/logo.js"></script>
 <script src="js/core.js"></script>
+<script src="js/collage.js"></script>
+<script src="js/bg.js"></script>
 <script src="js/poster.js"></script>
 <script src="js/content.js"></script>
 <script src="js/store.js"></script>

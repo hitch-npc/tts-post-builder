@@ -38,7 +38,13 @@
     digest: 'Подборка',
     video: 'Обложка видео'
   };
-  T.LAYOUTS = { frame: 'Картинка в поле', band: 'Картинка полосой', album: 'Альбом из 2', type: 'Без картинки' };
+  T.LAYOUTS = { frame: 'Картинка в поле', band: 'Картинка полосой', album: 'Альбом из 2', type: 'Без картинки', collage: 'Коллаж' };
+  // Коллаж: фигура из двух частей, в каждой своё фото. asp — ширина к высоте фигуры
+  T.SHAPES = {
+    ticket: { name: 'Разорванный билет', asp: 0.8 },
+    tt:     { name: 'Т и перевёрнутая Т', asp: 0.82 },
+    portal: { name: 'Портал и сцена', asp: 0.8 }
+  };
   // Рисунок свечения: «Рампа» — для постов с картинкой, остальные — для постов без картинки
   T.FX = {
     none: 'Нет', footlight: 'Рампа', beam: 'Луч', depth: 'Глубина', halo: 'Ореол',
@@ -99,6 +105,8 @@
     theme: 'light',
     genre: 'theatre',
     glow: 'studio',
+    art: 'glass',            // рисунок фона без картинки (T.ARTS); 'none' — вернуть свечение
+    artSeed: 1,              // номер узора: «Другой рисунок» меняет его
     field: 'auto',
     status: 'start',
     event: {
@@ -111,6 +119,12 @@
       image: { ref: 'example', x: 50, y: 50, zoom: 1 }
     },
     change: { kind: 'move', date: '2027-05-12', time: '19:00', venue: '', note: '' },
+    // depth — объём граней 0–48; seed — номер разрыва билета; side — вертикальная строка справа
+    collage: {
+      shape: 'ticket', depth: 24, seed: 0, side: 'Билеты на tickettoshow.ru',
+      p1: { ref: 'example', x: 30, y: 35, zoom: 1 },
+      p2: { ref: 'example', x: 80, y: 65, zoom: 1.4 }
+    },
     digest: {
       title: 'Куда пойти в конце апреля',
       items: [
@@ -141,7 +155,7 @@
   };
 
   T.PLACEHOLDER_TITLE = 'Название события';
-  T.LIMITS = { kind: 32, title: 48, lead: 90, subline: 60, detailsLead: 120, venue: 32, itemTitle: 32, digestTitle: 40, note: 120 };
+  T.LIMITS = { kind: 32, title: 48, lead: 90, subline: 60, detailsLead: 120, venue: 32, itemTitle: 32, digestTitle: 40, note: 120, side: 40 };
 
   /* ── утилиты ── */
   T.clone = function (o) { return JSON.parse(JSON.stringify(o)); };
