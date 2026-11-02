@@ -112,13 +112,15 @@
       if (kind === 'frame' || kind === 'band' || kind === 'cover') return 'footlight';
       return 'none';
     }
-    // рисунок фона — у постов без картинки и обложек видео; вместо свечения
+    // рисунок фона — у постов без картинки, обложек видео, переноса, отмены и подборки; вместо свечения
     var artKind = state.art || 'glass';
-    if ((layout === 'type' || layout === 'vtype') && T.ARTS && T.ARTS[artKind]) {
-      s.art = { kind: artKind, seed: state.artSeed || 1, center: layout === 'vtype' && s.typeStyle === 'center' };
+    var ART_LAYOUTS = { type: 1, vtype: 1, change: 1, digest: 1 };
+    if (ART_LAYOUTS[layout] && T.ARTS && T.ARTS[artKind]) {
+      s.art = { kind: artKind, seed: state.artSeed || 1,
+        calm: layout === 'digest' ? 'list' : layout === 'vtype' && s.typeStyle === 'center' ? 'mid' : 'low' };
     }
     function fxFor(kind) {
-      if (s.art && (kind === 'type' || kind === 'vtype')) return 'none';
+      if (s.art && ART_LAYOUTS[kind]) return 'none';
       return s.manualFx && s.manualFx !== 'auto' && T.FX[s.manualFx] ? s.manualFx : autoFx(kind);
     }
 
@@ -189,7 +191,7 @@
   // слой рисунка: картинка из шейдера, класс smm-fx — чтобы лечь под текст, как свечение
   function art(s) {
     if (!s.art || !T.artUrl) return '';
-    var url = T.artUrl({ kind: s.art.kind, seed: s.art.seed, theme: s.theme, hue: s.hue, field: s.field, w: 1080, h: s.H, center: s.art.center });
+    var url = T.artUrl({ kind: s.art.kind, seed: s.art.seed, theme: s.theme, hue: s.hue, field: s.field, w: 1080, h: s.H, calm: s.art.calm });
     return url ? '<img class="smm-fx bx-art" src="' + url + '" alt="">' : '';
   }
 
@@ -231,7 +233,7 @@
       var body = c.move
         ? '<div class="smm-big">' + esc(c.newDay) + '</div>' + (c.sub ? '<p class="smm-sub">' + esc(c.sub) + '</p>' : '')
         : '<p class="smm-line"><span class="smm-was">' + esc(c.was) + '</span>' + (c.venue ? ' · ' + esc(c.venue) : '') + '</p>';
-      return '<div class="' + canvasClass(s, 'smm-sheet') + '">' + fx(sl.fx) + head(s, sl.bars) +
+      return '<div class="' + canvasClass(s, 'smm-sheet') + '">' + art(s) + fx(sl.fx) + head(s, sl.bars) +
         '<div class="smm-text" data-limit="' + lim + '"><span class="smm-mark">' + esc(s.mark) + '</span>' + title(s, ts) + body +
           (c.note ? '<p class="smm-note">' + esc(c.note) + '</p>' : '') + '</div></div>';
     }
@@ -246,7 +248,7 @@
           '<div class="smm-dg-when"><span class="smm-num">' + esc(it.day) + '</span>' + (it.time ? '<span class="smm-label">' + esc(it.time) + '</span>' : '') + '</div>' +
           '<div class="smm-dg-what"><div class="smm-dg-title">' + nums(s, it.title) + '</div>' + (it.venue ? '<div class="smm-dg-meta">' + esc(it.venue) + '</div>' : '') + '</div>';
       }).join('');
-      return '<div class="' + canvasClass(s, 'smm-sheet') + '">' + fx(sl.fx) + head(s, sl.bars) +
+      return '<div class="' + canvasClass(s, 'smm-sheet') + '">' + art(s) + fx(sl.fx) + head(s, sl.bars) +
         '<div class="smm-grid' + (s.thumbs ? ' smm-dg-thumbs' : '') + '" data-limit="' + lim + '">' + title(s, ts, ' smm-span') +
           '<div class="smm-gap"></div>' + items + '</div></div>';
     }

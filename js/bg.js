@@ -151,12 +151,13 @@ float sn(vec2 v){
 float fbm(vec2 p){float s=0.,a=.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<5;i++){s+=a*sn(p);p=m*p;a*=.5;}return s;}
 float h21(vec2 p){vec3 p3=fract(vec3(p.xyx)*.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}
 float rnd(float n){return h21(vec2(n*1.37+.5,S*.731+2.3));}
-// тише там, где текст: внизу (CM=0) или полосой посередине (CM=1)
+// тише там, где текст: внизу (CM=0), полосой посередине (CM=1) или по всему списку (CM=2, подборка)
 float calm(vec2 p){
  float y=gl_FragCoord.y/R.y;
  float low=mix(1.-CALM*.8,1.,smoothstep(.12,.6,y));
  float mid=1.-CALM*.75*exp(-pow((y-.5)/.2,2.));
- return mix(low,mid,CM);}
+ float list=mix(1.-CALM*.7,1.-CALM*.25,smoothstep(.72,1.,y));
+ return CM<.5?low:CM<1.5?mid:list;}
 `;
   var MAIN = `
 // масштаб узора — от ширины: в посте и сторис рисунок одного размера, верх совпадает
@@ -216,10 +217,13 @@ void main(){float U=R.x*1.25;vec2 p=vec2(gl_FragCoord.x,gl_FragCoord.y-(R.y-U))/
     return progs[kind] = { p: p, u: u };
   }
 
-  // o: { kind, seed, theme, hue, field, w, h, center } → data URL (JPEG) или '' без WebGL 2
+  // o: { kind, seed, theme, hue, field, w, h, calm } → data URL (JPEG) или '' без WebGL 2
+  // calm: 'low' — текст внизу, 'mid' — посередине, 'list' — по всему холсту
+  var CALM_MODE = { low: 0, mid: 1, list: 2 };
   T.artUrl = function (o) {
     if (!KINDS[o.kind]) return '';
-    var key = [o.kind, o.seed, o.theme, o.hue, o.field, o.w, o.h, o.center ? 1 : 0].join('|');
+    var cm = CALM_MODE[o.calm] || 0;
+    var key = [o.kind, o.seed, o.theme, o.hue, o.field, o.w, o.h, cm].join('|');
     if (cache[key]) return cache[key];
     if (!init()) return '';
     var pr = prog(o.kind); if (!pr) return '';
@@ -228,7 +232,7 @@ void main(){float U=R.x*1.25;vec2 p=vec2(gl_FragCoord.x,gl_FragCoord.y-(R.y-U))/
     gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     var pal = []; palette(o).forEach(function (c) { pal.push(c[0], c[1], c[2]); });
     gl.uniform2f(pr.u.R, o.w, o.h); gl.uniform1f(pr.u.S, o.seed % 997 + 1); gl.uniform1f(pr.u.CALM, 1);
-    gl.uniform1f(pr.u.CM, o.center ? 1 : 0); gl.uniform1f(pr.u.GR, KINDS[o.kind].gr);
+    gl.uniform1f(pr.u.CM, cm); gl.uniform1f(pr.u.GR, KINDS[o.kind].gr);
     gl.uniform3fv(pr.u.P, new Float32Array(pal));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     var url = glc.toDataURL('image/jpeg', 0.95);
