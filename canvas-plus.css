@@ -179,6 +179,27 @@
   font-size: var(--smm-fs-caption); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--smm-muted);
 }
 .bx-cl-fig { flex: 1 1 0; min-height: var(--smm-image-min); position: relative; margin: 48px 80px 0 0; }
+/* сетка коллажа: 6 колонок с промежутком 24 px; справа 80 px под вертикальную строку */
+.smm-collage { --cl-gap: 24px; }
+.smm-collage .bx-cl-fig { width: calc((100% - 80px + var(--cl-gap)) * var(--cl-cols, 6) / 6 - var(--cl-gap)); flex-basis: 0; }
+.bx-cl-a-start  .bx-cl-fig { align-self: flex-start; }
+.bx-cl-a-center .bx-cl-fig { align-self: center; margin-left: auto; margin-right: auto; }
+.bx-cl-a-center .bx-cl-fig { transform: translateX(-40px); }
+.bx-cl-a-end    .bx-cl-fig { align-self: flex-end; }
+/* «Фигура сверху»: фигура под логотипом, название и строка внизу */
+.bx-cl-l-bottom .bx-cl-fig  { order: 1; margin-top: 0; }
+.bx-cl-l-bottom .bx-cl-top  { order: 2; margin-top: 48px; }
+.bx-cl-l-bottom .bx-cl-foot { order: 3; margin-top: 28px; }
+.bx-cl-l-bottom > .smm-head { order: 0; }
+.bx-cl-l-bottom > .smm-fx   { order: -1; }
+/* «Рядом»: фигура на левых колонках, текст и строка — на правых, прижаты к низу */
+.smm-collage.bx-cl-l-side { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: auto 1fr auto auto; column-gap: var(--cl-gap); }
+.bx-cl-l-side > .smm-head { grid-column: 1 / -1; grid-row: 1; }
+.bx-cl-l-side .bx-cl-fig  { grid-column: 1 / span var(--cl-side-cols, 3); grid-row: 2 / 5; width: auto; margin: 0; transform: none; min-height: 0; align-self: stretch; justify-self: stretch; }
+.bx-cl-l-side .bx-cl-top  { grid-column: calc(var(--cl-side-cols, 3) + 1) / -1; grid-row: 3; padding-right: 0; }
+.bx-cl-l-side .bx-cl-foot { grid-column: calc(var(--cl-side-cols, 3) + 1) / -1; grid-row: 4; margin-top: 28px; }
+.bx-cl-l-side .bx-cl-side { position: static; writing-mode: horizontal-tb; transform: none; display: block; margin-top: 24px; white-space: normal; overflow-wrap: anywhere; letter-spacing: .14em; }
+
 .bx-cl-fig > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
 .bx-cl-foot { flex: 0 0 auto; margin-top: 48px; }
 .bx-cl-foot > .smm-line { margin-top: 0; }

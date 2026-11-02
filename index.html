@@ -111,7 +111,7 @@
           <button class="chip" type="button" data-value="other">Другое</button>
         </div>
       </div>
-      <div class="field" data-when="layout:type,vtype,change,digest"><span class="label">Рисунок фона</span>
+      <div class="field" data-when="layout:type,vtype,change,digest,collage"><span class="label">Рисунок фона</span>
         <div class="chips" data-chips="art">
           <button class="chip" type="button" data-value="glass">Рифлёное стекло</button>
           <button class="chip" type="button" data-value="silk">Шёлк</button>
@@ -248,11 +248,40 @@
       <div class="field"><span class="label">Фигура</span>
         <div class="chips" data-chips="collage.shape">
           <button class="chip" type="button" data-value="ticket">Разорванный билет</button>
+          <button class="chip" type="button" data-value="stub">Корешок сбоку</button>
+          <button class="chip" type="button" data-value="notch">Билет с вырезами</button>
+          <button class="chip" type="button" data-value="strip">Корешок снизу</button>
+          <button class="chip" type="button" data-value="diag">Наискосок</button>
+          <button class="chip" type="button" data-value="wave">Волной</button>
           <button class="chip" type="button" data-value="tt">Т и перевёрнутая Т</button>
           <button class="chip" type="button" data-value="portal">Портал и сцена</button>
         </div>
-        <div class="btns" data-when="shape:ticket" style="margin-top:10px">
+        <div class="btns" data-when="shape:ticket,stub,notch,strip,diag,wave" style="margin-top:10px">
           <button class="btn btn-ghost btn-sm" type="button" id="clTear">Другой разрыв</button>
+        </div>
+      </div>
+      <div class="field"><span class="label">Сетка</span>
+        <div class="chips" data-chips="collage.grid">
+          <button class="chip" type="button" data-value="stack">Столбик</button>
+          <button class="chip" type="button" data-value="bottom">Фигура сверху</button>
+          <button class="chip" type="button" data-value="side">Рядом</button>
+        </div>
+        <p class="hint" data-when="clgrid:stack">Название сверху, фигура посередине, строка «когда и где» внизу.</p>
+        <p class="hint" data-when="clgrid:bottom">Фигура под логотипом, название и строка — внизу.</p>
+        <p class="hint" data-when="clgrid:side">Фигура на трёх левых колонках, название и строка — справа внизу.</p>
+      </div>
+      <div class="field" data-when="clgrid:stack,bottom"><span class="label">Ширина фигуры — колонок из 6</span>
+        <div class="chips" data-chips="collage.cols" data-num>
+          <button class="chip" type="button" data-value="6">6</button>
+          <button class="chip" type="button" data-value="5">5</button>
+          <button class="chip" type="button" data-value="4">4</button>
+        </div>
+      </div>
+      <div class="field" data-when="clgrid:stack,bottom"><span class="label">Фигура по сетке</span>
+        <div class="chips" data-chips="collage.align">
+          <button class="chip" type="button" data-value="start">Слева</button>
+          <button class="chip" type="button" data-value="center">По центру</button>
+          <button class="chip" type="button" data-value="end">Справа</button>
         </div>
       </div>
       <div class="field"><label class="label" for="clDepth">Объём</label>
@@ -280,7 +309,7 @@
         <div class="field"><label class="label" for="clP2Y">Вверх — вниз</label>
           <div class="range"><input type="range" id="clP2Y" min="0" max="100" step="1" data-bind="collage.p2.y" data-num><output data-out="collage.p2.y"></output></div></div>
       </div>
-      <p class="hint">Фон коллажа ровный, без света: объём фигуры и так держит пост.</p>
+      <p class="hint">Фон коллажа — в разделе «Вид»: рисунок или ровное поле. Свечения у коллажа нет: объём фигуры и так держит пост.</p>
     </section>
 
     <section class="sec" data-when="layout:frame,band,album">

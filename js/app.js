@@ -204,8 +204,8 @@
       : state.type === 'video' ? (state.video.layout === 'band' ? 'band' : 'vtype') : state.layout;
     return {
       mode: state.mode, type: state.type, layout: layout, format: state.format, kind: state.change.kind, style: state.video.style,
-      shape: state.collage.shape, art: state.art || 'glass',
-      bg: { type: 1, vtype: 1, change: 1, digest: 1 }[layout] && (state.art || 'glass') !== 'none' ? 'art' : 'flat',
+      shape: state.collage.shape, clgrid: state.collage.grid || 'stack', art: state.art || 'glass',
+      bg: { type: 1, vtype: 1, change: 1, digest: 1, collage: 1 }[layout] && (state.art || 'glass') !== 'none' ? 'art' : 'flat',
       titleSize: state.adv.titleSize ? 'manual' : 'auto',
       customRows: state.adv.customRows ? 'yes' : 'no',
       exportType: state.adv.exportType

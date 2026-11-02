@@ -94,6 +94,10 @@
       s.collage = {
         shape: T.SHAPES[cl.shape] ? cl.shape : 'ticket', depth: cl.depth,
         seed: (T.hashStr(e.title) + (cl.seed || 0)) >>> 0, side: ty(cl.side),
+        // сетка: компоновка, ширина фигуры в колонках из 6, выравнивание фигуры
+        grid: { stack: 1, bottom: 1, side: 1 }[cl.grid] ? cl.grid : 'stack',
+        cols: [4, 5, 6].indexOf(+cl.cols) !== -1 ? +cl.cols : 6,
+        align: { start: 1, center: 1, end: 1 }[cl.align] ? cl.align : 'start',
         p1: pic(cl.p1), p2: pic(cl.p2)
       };
     }
@@ -121,13 +125,13 @@
     }
     // рисунок фона — у постов без картинки, обложек видео, переноса, отмены и подборки; вместо свечения
     var artKind = state.art || 'glass';
-    var ART_LAYOUTS = { type: 1, vtype: 1, change: 1, digest: 1 };
+    var ART_LAYOUTS = { type: 1, vtype: 1, change: 1, digest: 1, collage: 1 };
     if (ART_LAYOUTS[layout] && T.ARTS && T.ARTS[artKind]) {
       // цвет: в расширенном интерфейсе — любой из цветов бренда, иначе по смыслу (жанр, перенос, отмена)
       var pick = state.mode === 'advanced' && state.artHue && state.artHue !== 'auto' ? state.artHue : '';
       if (pick === 'red' && type !== 'change') pick = '';   // красный — сигнал тревоги, только у переноса и отмены
       s.art = { kind: artKind, seed: state.artSeed || 1, hue: pick || s.hue,
-        calm: layout === 'digest' ? 'list' : layout === 'vtype' && s.typeStyle === 'center' ? 'mid' : 'low' };
+        calm: layout === 'digest' || layout === 'collage' ? 'list' : layout === 'vtype' && s.typeStyle === 'center' ? 'mid' : 'low' };
     }
     if (s.markColor === 'art') {
       var mh = (s.art && s.art.hue) || s.hue;
@@ -272,7 +276,8 @@
     if (k === 'collage') {
       // сверху надзаголовок и название, справа вертикальная строка, посередине фигура, внизу «когда и где»
       var c = s.collage;
-      return '<div class="' + canvasClass(s, 'smm-collage') + '">' + fx(sl.fx) + head(s, sl.bars) +
+      return '<div class="' + canvasClass(s, 'smm-collage bx-cl-l-' + c.grid + ' bx-cl-a-' + c.align) + '" style="--cl-cols:' + c.cols + '">' +
+        art(s) + fx(sl.fx) + head(s, sl.bars) +
         '<div class="smm-text bx-cl-top">' + kicker(s) + title(s, ts) +
           (c.side ? '<span class="bx-cl-side">' + esc(c.side) + '</span>' : '') + '</div>' +
         '<div class="bx-cl-fig">' + T.collageSvg(c) + '</div>' +

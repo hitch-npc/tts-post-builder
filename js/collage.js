@@ -33,8 +33,66 @@
     return pts;
   }
 
+  /* ── простые билеты: тело с вырезанными углами, разрыв поперёк ──
+     Координаты — доли рамки; круг в долях по y сжат в asp раз, чтобы на холсте остаться кругом. */
+  function arc(cx, cy, r, asp, a0, a1, n) {
+    var out = [];
+    for (var i = 0; i <= n; i++) {
+      var a = (a0 + (a1 - a0) * i / n) * Math.PI / 180;
+      out.push([cx + r * Math.cos(a), cy + r * asp * Math.sin(a)]);
+    }
+    return out;
+  }
+  // разрыв: rough — рваный, perf — по перфорации, wave — мягкой волной; от левого края к правому (или сверху вниз)
+  function tearLine(kind, seed, from, to, vertical) {
+    var r = rng(seed), pts = [], n = kind === 'perf' ? 26 : kind === 'wave' ? 40 : 13, ph = r() * 6.28;
+    for (var i = 0; i <= n; i++) {
+      var t = i / n, base = from + (to - from) * t, off;
+      if (kind === 'perf') off = (i % 2 ? 1 : -1) * 0.007;
+      else if (kind === 'wave') off = 0.035 * Math.sin(ph + t * Math.PI * 3);
+      else off = (i % 2 ? 1 : -1) * (0.012 + r() * 0.024);
+      if (i === 0 || i === n) off = 0;
+      pts.push(vertical ? [base + off, t] : [t, base + off]);
+    }
+    return pts;
+  }
+  // Две части билета. o: { asp, r — радиус выреза углов (0 — прямые), tear, at, to, vertical, notch — радиус выреза у разрыва }
+  function ticketPieces(o, seed) {
+    var a = o.asp, r = o.r, nr = o.notch || 0;
+    var tl = r ? arc(0, 0, r, a, 90, 0, 6) : [[0, 0]], tr = r ? arc(1, 0, r, a, 180, 90, 6) : [[1, 0]];
+    var br = r ? arc(1, 1, r, a, 270, 180, 6) : [[1, 1]], bl = r ? arc(0, 1, r, a, 0, -90, 6) : [[0, 1]];
+    var tp = tearLine(o.tear, seed, o.at, o.to == null ? o.at : o.to, o.vertical);
+    if (o.vertical) {
+      var c0 = tp[0][0], c1 = tp[tp.length - 1][0];
+      // вырезы-полукруги на кромках, через них идёт разрыв
+      var nTopL = nr ? arc(c0, 0, nr, a, 180, 90, 8) : [], nTopR = nr ? arc(c0, 0, nr, a, 90, 0, 8) : [];
+      var nBotL = nr ? arc(c1, 1, nr, a, 270, 180, 8) : [], nBotR = nr ? arc(c1, 1, nr, a, 360, 270, 8) : [];
+      var mid = nr ? tp.slice(1, -1).map(function (p, i, arr) { var t = (i + 1) / (arr.length + 1); return [p[0], nr * a + (1 - 2 * nr * a) * t]; }) : tp;
+      var left = tl.concat(nTopL.length ? nTopL : [], mid, nBotL.length ? nBotL : [], bl);
+      var right = (nTopR.length ? nTopR : []).concat(tr, br, nBotR.length ? nBotR : [], mid.slice().reverse());
+      return [
+        { bb: [0, 0, 1, 1], poly: left, rot: -0.02 },
+        { bb: [0, 0, 1, 1], poly: right, dx: 0.06, dy: -0.04, rot: 0.045 }
+      ];
+    }
+    var top = tl.concat(tr, tp.slice().reverse());
+    var bot = tp.concat(br, bl);
+    return [
+      { bb: [0, 0, 1, 1], poly: top, rot: 0.025 },
+      { bb: [0, 0, 1, 1], poly: bot, dx: 0.05, dy: 0.05, rot: -0.04 }
+    ];
+  }
+  T.TICKETS = {
+    stub:  { asp: 1.6, r: 0.06, tear: 'rough', at: 0.7, vertical: true },               // корешок сбоку
+    notch: { asp: 1.6, r: 0, tear: 'perf', at: 0.68, vertical: true, notch: 0.045 },   // классический: вырезы и перфорация
+    diag:  { asp: 0.8, r: 0.09, tear: 'rough', at: 0.28, to: 0.72 },                    // наискосок
+    wave:  { asp: 0.8, r: 0.09, tear: 'wave', at: 0.5 },                                 // мягкой волной
+    strip: { asp: 0.62, r: 0.07, tear: 'perf', at: 0.74 }                               // высокий, корешок снизу по перфорации
+  };
+
   // Части фигуры в долях рамки: bb — рамка фото, dx/dy — сдвиг части, rot — поворот в радианах
   function pieces(shape, seed) {
+    if (T.TICKETS[shape]) return ticketPieces(T.TICKETS[shape], seed);
     if (shape === 'tt') return [
       { bb: [0, 0, 1, 0.5], poly: [[0, 0], [1, 0.05], [1, 0.21], [0.67, 0.19], [0.67, 0.5], [0.33, 0.48], [0.33, 0.17], [0, 0.15]] },
       { bb: [0.04, 0.52, 1, 0.48], poly: [[0.37, 0.52], [0.71, 0.54], [0.71, 0.83], [1.04, 0.85], [1.04, 1], [0.04, 0.96], [0.04, 0.81], [0.37, 0.79]] }
