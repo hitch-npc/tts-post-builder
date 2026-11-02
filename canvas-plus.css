@@ -1,6 +1,6 @@
 /* Конструктор постов TTS — расширение холста поверх SMM-слоя (ds/ds-smm.css).
    Здесь то, чего в слое дизайн-системы пока нет: Forum в названиях, цифры без старостильных форм, плотность начертания,
-   новые рисунки свечения со смешением цветов, зерно и обложка видео. Не меняет ds-smm.css; подключается после него. */
+   поля фона, тональный свет, зерно и обложка видео. Не меняет ds-smm.css; подключается после него. */
 
 /* ───── Шрифты: названия и даты — Forum ─────
    Cormorant тонкий и на мелкой сетке ленты рассыпается, а его цифры по умолчанию старостильные («11» → «ıı»).
@@ -26,109 +26,113 @@
 .bx-d1 .smm-dg-title, .bx-d1 .smm-num { -webkit-text-stroke-width: .022em; }
 .bx-d2 .smm-dg-title, .bx-d2 .smm-num { -webkit-text-stroke-width: .045em; }
 
-/* ───── Смешение цветов свечения ─────
-   --bx-h1…h3 — три цвета рисунка. Стандарт (один цвет жанра) — все три равны цвету жанра. */
+/* ───── Поле: цвет фона целиком ─────
+   Ровная плоскость цвета, как бумага или студийный фон. Текст и линии подбираются под поле.
+   Стандарт — по теме (#F2F1EB / #0D0D0D). Поле «Ночь» тонировано цветом жанра. */
+.smm-canvas.bx-field-paper    { --smm-bg: #ECE8DD; --smm-fg: #151413; --smm-muted: #47453F; --smm-label: #6A675F; --smm-line: #C9C3B4; }
+.smm-canvas.bx-field-stone    { --smm-bg: #C6C5BD; --smm-fg: #111111; --smm-muted: #393936; --smm-label: #52524C; --smm-line: #A3A299; }
+.smm-canvas.bx-field-graphite { --smm-bg: #1D1E21; --smm-fg: #E6E4DE; --smm-muted: #AAA8A2; --smm-label: #82807B; --smm-line: #34363B; }
+.smm-canvas.bx-field-night    { --smm-bg: color-mix(in oklab, var(--smm-hue) 34%, #060709); --smm-fg: #E4E3DD; --smm-muted: #A9A8A3; --smm-label: #807F7A; --smm-line: color-mix(in oklab, var(--smm-hue) 40%, #24262B); }
+.smm-canvas.bx-field-cobalt   {
+  --smm-bg: #0047FF; --smm-fg: #FFFFFF; --smm-muted: color-mix(in oklab, #FFFFFF 80%, #0047FF); --smm-label: color-mix(in oklab, #FFFFFF 66%, #0047FF);
+  --smm-line: color-mix(in oklab, #FFFFFF 28%, #0047FF); --smm-accent: #FFFFFF; --smm-hue: #0047FF;
+}
+
+/* ───── Свет ─────
+   Один тон на кадр: свет — тот же цвет поля, только светлее (--bx-light), тень — темнее (--bx-shade).
+   Градиенты в oklab и с плавным спадом через несколько остановок: без серой «грязи» и ступенек. Цвет жанра — лёгкий оттенок света. */
 .smm-canvas {
-  --bx-cool: var(--smm-dark-hue-cool); --bx-warm: var(--smm-dark-hue-warm); --bx-green: var(--smm-dark-hue-green);
-  --bx-violet: color-mix(in srgb, #7A4DFF 62%, var(--smm-bg));
-  --bx-h1: var(--smm-hue); --bx-h2: var(--smm-hue); --bx-h3: var(--smm-hue);
+  --bx-light: color-mix(in oklab, var(--smm-fg) 84%, var(--smm-hue));
+  --bx-shade: color-mix(in oklab, var(--smm-bg) 55%, #000000);
+  --bx-k: 1; --bx-ks: 1;      /* сила света и тени: на светлом поле белый почти не виден — свет сильнее, тень мягче */
 }
-.smm-canvas--light {
-  --bx-cool: var(--smm-light-hue-cool); --bx-warm: var(--smm-light-hue-warm); --bx-green: var(--smm-light-hue-green);
-  --bx-violet: color-mix(in srgb, #8B5CF6 38%, var(--smm-bg));
+.smm-canvas--light { --bx-light: color-mix(in oklab, #FFFFFF 90%, var(--smm-hue)); --bx-shade: color-mix(in oklab, var(--smm-bg) 72%, #000000); --bx-k: 3.2; --bx-ks: .8; }
+.smm-canvas.bx-field-stone { --bx-k: 3.8; }
+/* на светлом поле «Окно» читается через тень: стена чуть темнее, полосы светлее */
+.smm-canvas--light .smm-fx--window::before {
+  background: linear-gradient(in oklab 160deg, color-mix(in oklab, var(--bx-shade) 9%, var(--smm-bg)) 0%, color-mix(in oklab, var(--bx-shade) 4%, var(--smm-bg)) 60%, var(--smm-bg) 100%);
 }
-.smm-canvas.bx-mix-cw  { --bx-h1: var(--bx-cool); --bx-h2: var(--bx-warm); --bx-h3: color-mix(in srgb, var(--bx-cool) 50%, var(--bx-warm)); --smm-hue: var(--bx-h1); }
-.smm-canvas.bx-mix-cg  { --bx-h1: var(--bx-cool); --bx-h2: var(--bx-green); --bx-h3: color-mix(in srgb, var(--bx-cool) 50%, var(--bx-green)); --smm-hue: var(--bx-h1); }
-.smm-canvas.bx-mix-wg  { --bx-h1: var(--bx-warm); --bx-h2: var(--bx-green); --bx-h3: color-mix(in srgb, var(--bx-warm) 50%, var(--bx-green)); --smm-hue: var(--bx-h1); }
-.smm-canvas.bx-mix-cv  { --bx-h1: var(--bx-cool); --bx-h2: var(--bx-violet); --bx-h3: color-mix(in srgb, var(--bx-cool) 50%, var(--bx-violet)); --smm-hue: var(--bx-h1); }
-.smm-canvas.bx-mix-cwg { --bx-h1: var(--bx-cool); --bx-h2: var(--bx-warm); --bx-h3: var(--bx-green); --smm-hue: var(--bx-h1); }
-.smm-canvas.bx-mix-mono {
-  --bx-h1: color-mix(in srgb, var(--smm-fg) 22%, var(--smm-bg)); --bx-h2: color-mix(in srgb, var(--smm-fg) 12%, var(--smm-bg));
-  --bx-h3: color-mix(in srgb, var(--smm-fg) 32%, var(--smm-bg)); --smm-hue: var(--bx-h1);
-}
-
-/* ───── Новые рисунки свечения ───── */
+.smm-canvas.bx-field-cobalt { --bx-light: color-mix(in oklab, #FFFFFF 70%, #6E9BFF); --bx-shade: #001A8C; }
 .smm-fx > i { position: absolute; display: block; pointer-events: none; }
-.smm-fx--blobs, .smm-fx--orbit, .smm-fx--arch, .smm-fx--ribbon, .smm-fx--rays, .smm-fx--curtain { --bx-a: 1; }
 
-/* «Пятна» — три органичных пятна разной формы и цвета, края размыты */
-.smm-fx--blobs > i { filter: blur(36px); aspect-ratio: 1; }
-.smm-fx--blobs > i:nth-child(1) {
-  width: 84%; right: -30%; bottom: -16%; transform: rotate(18deg); border-radius: 58% 42% 63% 37% / 41% 58% 42% 59%;
-  background: radial-gradient(62% 62% at 46% 46%, var(--bx-h1) 0%, color-mix(in srgb, var(--bx-h1) 45%, transparent) 62%, transparent 100%);
+/* «Студия» — фон-циклорама: свет сверху, мягкий спад, пол чуть темнее */
+.smm-fx--studio::before {
+  inset: 0;
+  background:
+    radial-gradient(in oklab 125% 72% at 50% -10%,
+      color-mix(in oklab, var(--bx-light) min(100%, calc(15% * var(--bx-k))), var(--smm-bg)) 0%, color-mix(in oklab, var(--bx-light) min(100%, calc(11% * var(--bx-k))), var(--smm-bg)) 20%,
+      color-mix(in oklab, var(--bx-light) min(100%, calc(6.5% * var(--bx-k))), var(--smm-bg)) 40%, color-mix(in oklab, var(--bx-light) min(100%, calc(2.5% * var(--bx-k))), var(--smm-bg)) 60%, var(--smm-bg) 80%),
+    var(--smm-bg);
 }
-.smm-fx--blobs > i:nth-child(2) {
-  width: 62%; left: -22%; bottom: 26%; transform: rotate(-24deg); border-radius: 46% 54% 38% 62% / 58% 36% 64% 42%;
-  background: radial-gradient(60% 60% at 52% 48%, var(--bx-h2) 0%, color-mix(in srgb, var(--bx-h2) 40%, transparent) 64%, transparent 100%);
-}
-.smm-fx--blobs > i:nth-child(3) {
-  width: 38%; right: 6%; top: 14%; transform: rotate(40deg); border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
-  background: radial-gradient(60% 60% at 50% 50%, var(--bx-h3) 0%, color-mix(in srgb, var(--bx-h3) 35%, transparent) 66%, transparent 100%);
-}
-
-/* «Лучи» — веер лучей из верхнего угла, как свет из-под колосников */
-.smm-fx--rays { -webkit-mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 82%); mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 82%); }
-.smm-fx--rays > i { left: -20%; top: -12%; width: 140%; height: 140%; filter: blur(9px); }
-.smm-fx--rays > i:nth-child(1) {
-  background: conic-gradient(from 118deg at 14% 0%, transparent 0 4deg,
-    color-mix(in srgb, var(--bx-h1) 92%, transparent) 4deg 8deg, transparent 8deg 15deg,
-    color-mix(in srgb, var(--bx-h1) 70%, transparent) 15deg 24deg, transparent 24deg 35deg,
-    color-mix(in srgb, var(--bx-h1) 85%, transparent) 35deg 38deg, transparent 38deg 100%);
-}
-.smm-fx--rays > i:nth-child(2) {
-  background: conic-gradient(from 118deg at 14% 0%, transparent 0 10deg,
-    color-mix(in srgb, var(--bx-h2) 78%, transparent) 10deg 13deg, transparent 13deg 28deg,
-    color-mix(in srgb, var(--bx-h2) 60%, transparent) 28deg 34deg, transparent 34deg 46deg,
-    color-mix(in srgb, var(--bx-h2) 88%, transparent) 46deg 50deg, transparent 50deg 100%);
-}
-.smm-fx--rays > i:nth-child(3) {
-  left: -30%; top: -30%; width: 70%; height: 60%; border-radius: 50%; filter: blur(40px);
-  background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--bx-h3) 90%, transparent), transparent 70%);
+.smm-fx--studio::after {
+  left: 0; right: 0; bottom: 0; height: 46%;
+  background: linear-gradient(in oklab 180deg, transparent 0%, color-mix(in oklab, var(--bx-shade) min(100%, calc(10% * var(--bx-ks))), transparent) 40%,
+    color-mix(in oklab, var(--bx-shade) min(100%, calc(26% * var(--bx-ks))), transparent) 75%, color-mix(in oklab, var(--bx-shade) min(100%, calc(38% * var(--bx-ks))), transparent) 100%);
 }
 
-/* «Орбиты» — концентрические кольца и точка света, геометрия без размытия */
-.smm-fx--orbit > i { border-radius: 9999px; aspect-ratio: 1; }
-.smm-fx--orbit > i:nth-child(1) { width: 150%; left: -10%; top: 38%; border: 3px solid color-mix(in srgb, color-mix(in srgb, var(--bx-h1) 62%, var(--smm-fg)) 70%, transparent); }
-.smm-fx--orbit > i:nth-child(2) { width: 104%; left: 18%; top: 54%; border: 3px solid color-mix(in srgb, color-mix(in srgb, var(--bx-h2) 62%, var(--smm-fg)) 55%, transparent); }
-.smm-fx--orbit > i:nth-child(3) {
-  width: 62%; left: 42%; top: 66%; filter: blur(14px);
-  background: radial-gradient(50% 50% at 50% 50%, var(--bx-h3) 0%, color-mix(in srgb, var(--bx-h3) 50%, transparent) 55%, transparent 100%);
+/* «Прожектор» — одно пятно света над названием и тёмные края */
+.smm-fx--spot::before {
+  inset: 0;
+  background: radial-gradient(in oklab 64% 44% at 50% 36%,
+    color-mix(in oklab, var(--bx-light) min(100%, calc(22% * var(--bx-k))), var(--smm-bg)) 0%, color-mix(in oklab, var(--bx-light) min(100%, calc(16% * var(--bx-k))), var(--smm-bg)) 16%,
+    color-mix(in oklab, var(--bx-light) min(100%, calc(9% * var(--bx-k))), var(--smm-bg)) 34%, color-mix(in oklab, var(--bx-light) min(100%, calc(3.5% * var(--bx-k))), var(--smm-bg)) 56%, var(--smm-bg) 80%);
+}
+.smm-fx--spot::after {
+  inset: 0;
+  background: radial-gradient(in oklab 130% 95% at 50% 40%, transparent 50%, color-mix(in oklab, var(--bx-shade) min(100%, calc(22% * var(--bx-ks))), transparent) 72%,
+    color-mix(in oklab, var(--bx-shade) min(100%, calc(48% * var(--bx-ks))), transparent) 100%);
 }
 
-/* «Арка» — сцена-портал: две вложенные арки света и пол */
-.smm-fx--arch > i:nth-child(1) {
-  left: 8%; right: 8%; bottom: -6%; height: 78%; border-radius: 9999px 9999px 0 0; filter: blur(26px);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bx-h1) 70%, transparent) 0%, var(--bx-h1) 100%);
+/* «Окно» — свет из окна падает на стену косыми полосами, как на фотосъёмке днём */
+.smm-fx--window::before {
+  inset: 0;
+  background: radial-gradient(in oklab 90% 70% at 78% 18%, color-mix(in oklab, var(--bx-light) min(100%, calc(7% * var(--bx-k))), var(--smm-bg)) 0%, var(--smm-bg) 70%);
 }
-.smm-fx--arch > i:nth-child(2) {
-  left: 24%; right: 24%; bottom: -6%; height: 56%; border-radius: 9999px 9999px 0 0; filter: blur(30px);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bx-h2) 60%, transparent) 0%, var(--bx-h2) 100%);
+.smm-fx--window > i {
+  top: -12%; height: 92%; transform: skewX(-16deg); filter: blur(16px);
+  background: linear-gradient(in oklab 180deg, color-mix(in oklab, var(--bx-light) min(100%, calc(17% * var(--bx-k))), transparent) 0%,
+    color-mix(in oklab, var(--bx-light) min(100%, calc(11% * var(--bx-k))), transparent) 40%, color-mix(in oklab, var(--bx-light) min(100%, calc(4% * var(--bx-k))), transparent) 75%, transparent 100%);
 }
-.smm-fx--arch > i:nth-child(3) {
-  left: -10%; right: -10%; bottom: -14%; height: 26%; filter: blur(28px);
-  background: radial-gradient(50% 60% at 50% 100%, var(--bx-h3) 0%, transparent 100%);
+.smm-fx--window > i:nth-child(1) { left: 44%; width: 19%; }
+.smm-fx--window > i:nth-child(2) { left: 66%; width: 19%; }
+.smm-fx--window > i:nth-child(3) { left: 88%; width: 12%; opacity: .7; }
+
+/* «Кромка» — тонкая светлая линия горизонта и мягкое свечение над ней */
+.smm-fx--edge::before {
+  left: 0; right: 0; top: 38%; height: 2px; z-index: 1;
+  background: linear-gradient(in oklab 90deg, transparent 4%, color-mix(in oklab, var(--bx-light) min(100%, calc(30% * var(--bx-k))), transparent) 26%,
+    color-mix(in oklab, var(--bx-light) min(100%, calc(62% * var(--bx-k))), transparent) 50%, color-mix(in oklab, var(--bx-light) min(100%, calc(30% * var(--bx-k))), transparent) 74%, transparent 96%);
+}
+.smm-fx--edge::after {
+  left: -10%; right: -10%; top: 6%; height: 32%;
+  background: radial-gradient(in oklab 50% 100% at 50% 100%, color-mix(in oklab, var(--bx-light) min(100%, calc(13% * var(--bx-k))), transparent) 0%,
+    color-mix(in oklab, var(--bx-light) min(100%, calc(7% * var(--bx-k))), transparent) 30%, color-mix(in oklab, var(--bx-light) min(100%, calc(2.5% * var(--bx-k))), transparent) 60%, transparent 100%);
 }
 
-/* «Лента» — две-три диагональные полосы, как шёлк на сцене */
-.smm-fx--ribbon > i { left: -30%; width: 160%; transform: rotate(-22deg); filter: blur(28px); }
-.smm-fx--ribbon > i:nth-child(1) { top: 46%; height: 24%; background: linear-gradient(90deg, transparent 0%, var(--bx-h1) 38%, var(--bx-h2) 72%, transparent 100%); }
-.smm-fx--ribbon > i:nth-child(2) { top: 72%; height: 12%; background: linear-gradient(90deg, transparent 6%, var(--bx-h2) 46%, var(--bx-h3) 80%, transparent 100%); }
-.smm-fx--ribbon > i:nth-child(3) { top: 26%; height: 8%; opacity: .7; background: linear-gradient(90deg, transparent 20%, var(--bx-h3) 60%, transparent 100%); }
+/* «Туман» — светлая дымка поднимается от пола и тает */
+.smm-fx--fog::before {
+  left: -20%; right: -20%; bottom: -12%; height: 74%; filter: blur(10px);
+  background: radial-gradient(in oklab 58% 72% at 50% 100%, color-mix(in oklab, var(--bx-light) min(100%, calc(17% * var(--bx-k))), transparent) 0%,
+    color-mix(in oklab, var(--bx-light) min(100%, calc(11% * var(--bx-k))), transparent) 24%, color-mix(in oklab, var(--bx-light) min(100%, calc(5.5% * var(--bx-k))), transparent) 50%,
+    color-mix(in oklab, var(--bx-light) min(100%, calc(1.5% * var(--bx-k))), transparent) 74%, transparent 100%);
+}
 
-/* «Занавес» — вертикальные складки, свет уходит вверх */
-.smm-fx--curtain > i { top: 0; bottom: 0; filter: blur(12px); -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%); mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%); }
-.smm-fx--curtain > i:nth-child(1) { left: -4%; right: -4%; background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--bx-h1) 86%, transparent) 0 7%, transparent 7% 15%); }
-.smm-fx--curtain > i:nth-child(2) { left: 4%; right: -4%; opacity: .75; background: repeating-linear-gradient(90deg, transparent 0 7%, color-mix(in srgb, var(--bx-h2) 80%, transparent) 7% 11%, transparent 11% 15%); }
-.smm-fx--curtain > i:nth-child(3) { left: 0; right: 0; bottom: -8%; top: auto; height: 30%; background: radial-gradient(60% 80% at 50% 100%, var(--bx-h3), transparent 100%); -webkit-mask-image: none; mask-image: none; filter: blur(24px); }
+/* «Виньетка» — ровное поле, края темнее, как отпечаток на бумаге */
+.smm-fx--vignette::before {
+  inset: 0;
+  background: radial-gradient(in oklab 120% 90% at 50% 45%, transparent 46%, color-mix(in oklab, var(--bx-shade) min(100%, calc(16% * var(--bx-ks))), transparent) 70%,
+    color-mix(in oklab, var(--bx-shade) min(100%, calc(42% * var(--bx-ks))), transparent) 100%);
+}
 
 /* ───── Зерно ───── */
 .smm-canvas.bx-grain::after {
-  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: .07; background-size: 300px 300px;
+  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: .06; background-size: 260px 260px;
   background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* на светлом фоне зерно заметнее выдерживает больше */
-.smm-canvas--light.bx-grain::after { opacity: .16; }
+/* на светлом поле зерно видно хуже — сильнее */
+.smm-canvas--light.bx-grain::after { opacity: .12; }
+.smm-canvas.bx-field-cobalt.bx-grain::after { opacity: .1; }
 
 /* ───── Обложка видео: «только заголовок» ─────
    В сетке профиля обложка 9:16 видна 3:4 по центру: верх и низ по 240 px срезаются, поля сторис (262 / 250) это учитывают.

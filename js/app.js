@@ -317,6 +317,9 @@
       if (key === 'status' && Object.keys(T.STATUSES).some(function (k) { return T.STATUSES[k].why === state.caption.why; })) state.caption.why = '';
       setPath(state, key, v);
       if (key === 'layout' || key === 'type') state.slide = 1;
+      // поле задаёт тему (светлое — светлая), а выбор темы возвращает поле «по теме»
+      if (key === 'field' && T.FIELDS[v] && T.FIELDS[v].theme) state.theme = T.FIELDS[v].theme;
+      if (key === 'theme') state.field = 'auto';
       // обложка видео вертикальная — сразу 9:16
       if (key === 'type' && v === 'video' && state.format === 'post') state.format = 'story';
       update({ lists: false });

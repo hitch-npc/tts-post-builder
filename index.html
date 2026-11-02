@@ -64,19 +64,19 @@
           <button class="chip" type="button" data-value="type">Без картинки</button>
         </div>
       </div>
-      <div class="field" data-when="layout:type,vtype"><span class="label">Свечение</span>
+      <div class="field" data-when="layout:type,vtype"><span class="label">Свет</span>
         <div class="chips" data-chips="glow">
+          <button class="chip" type="button" data-value="studio">Студия</button>
+          <button class="chip" type="button" data-value="spot">Прожектор</button>
+          <button class="chip" type="button" data-value="window">Окно</button>
+          <button class="chip" type="button" data-value="edge">Кромка</button>
+          <button class="chip" type="button" data-value="fog">Туман</button>
+          <button class="chip" type="button" data-value="vignette">Виньетка</button>
           <button class="chip" type="button" data-value="beam">Луч</button>
           <button class="chip" type="button" data-value="depth">Глубина</button>
           <button class="chip" type="button" data-value="halo">Ореол</button>
-          <button class="chip" type="button" data-value="blobs">Пятна</button>
-          <button class="chip" type="button" data-value="rays">Лучи</button>
-          <button class="chip" type="button" data-value="orbit">Орбиты</button>
-          <button class="chip" type="button" data-value="arch">Арка</button>
-          <button class="chip" type="button" data-value="ribbon">Лента</button>
-          <button class="chip" type="button" data-value="curtain">Занавес</button>
         </div>
-        <p class="hint">Цвет свечения — от жанра. В простом интерфейсе — один цвет на пост; смешать цвета можно в разделе «Дизайн».</p>
+        <p class="hint">Свет того же цвета, что фон, только светлее — как в фотостудии. Жанр слегка тонирует свет.</p>
       </div>
       <div class="field"><span class="label">Формат</span>
         <div class="chips" data-chips="format">
@@ -90,6 +90,17 @@
           <button class="chip" type="button" data-value="light">Светлая</button>
           <button class="chip" type="button" data-value="dark">Тёмная</button>
         </div>
+      </div>
+      <div class="field"><span class="label">Фон</span>
+        <div class="chips" data-chips="field">
+          <button class="chip" type="button" data-value="auto">По теме</button>
+          <button class="chip" type="button" data-value="paper">Бумага</button>
+          <button class="chip" type="button" data-value="stone">Камень</button>
+          <button class="chip" type="button" data-value="graphite">Графит</button>
+          <button class="chip" type="button" data-value="night">Ночь</button>
+          <button class="chip" type="button" data-value="cobalt" data-when="mode:advanced">Кобальт</button>
+        </div>
+        <p class="hint">Ровная плоскость цвета, текст подбирается сам. «Ночь» тонирована цветом жанра.</p>
       </div>
       <div class="field" data-when="type:announce,status,digest,video"><span class="label">Жанр — от него цвет свечения</span>
         <div class="chips" data-chips="genre">
@@ -239,29 +250,17 @@
           <button class="chip" type="button" data-value="beam">Луч</button>
           <button class="chip" type="button" data-value="depth">Глубина</button>
           <button class="chip" type="button" data-value="halo">Ореол</button>
-          <button class="chip" type="button" data-value="blobs">Пятна</button>
-          <button class="chip" type="button" data-value="rays">Лучи</button>
-          <button class="chip" type="button" data-value="orbit">Орбиты</button>
-          <button class="chip" type="button" data-value="arch">Арка</button>
-          <button class="chip" type="button" data-value="ribbon">Лента</button>
-          <button class="chip" type="button" data-value="curtain">Занавес</button>
+          <button class="chip" type="button" data-value="studio">Студия</button>
+          <button class="chip" type="button" data-value="spot">Прожектор</button>
+          <button class="chip" type="button" data-value="window">Окно</button>
+          <button class="chip" type="button" data-value="edge">Кромка</button>
+          <button class="chip" type="button" data-value="fog">Туман</button>
+          <button class="chip" type="button" data-value="vignette">Виньетка</button>
         </div>
         <p class="hint">Авто: «Рампа» на постах с картинкой, «Глубина» на слайде деталей, выбранное свечение без картинки, у переноса, отмены и подборки — нет.</p>
       </div>
-      <div class="field"><span class="label">Цвета свечения</span>
-        <div class="chips" data-chips="adv.mix">
-          <button class="chip" type="button" data-value="genre">Один — жанра</button>
-          <button class="chip" type="button" data-value="cw">Синий + тёплый</button>
-          <button class="chip" type="button" data-value="cg">Синий + зелёный</button>
-          <button class="chip" type="button" data-value="wg">Тёплый + зелёный</button>
-          <button class="chip" type="button" data-value="cv">Синий + фиолет</button>
-          <button class="chip" type="button" data-value="cwg">Три цвета</button>
-          <button class="chip" type="button" data-value="mono">Серебро</button>
-        </div>
-        <p class="hint">Стандарт дизайн-системы — один цвет жанра. Смешение — для обложек и постов без картинки: фон «Пятна», «Лучи», «Арка», «Лента», «Занавес» раскрываются только с двумя-тремя цветами.</p>
-      </div>
       <div class="field"><label class="check"><input type="checkbox" data-bind="adv.grain"> Зерно поверх фона</label>
-        <p class="hint">Мягкая плёнка: убирает ступеньки градиента и оживляет тёмную тему.</p></div>
+        <p class="hint">Включено по умолчанию: тонкая плёнка убирает ступеньки градиента. Выключать — для плоских графических постов.</p></div>
       <div class="field"><span class="label">Поля</span>
         <div class="chips" data-chips="adv.margins">
           <button class="chip" type="button" data-value="wide">112 px</button>

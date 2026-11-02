@@ -43,7 +43,8 @@
       titleFont: a.titleFont === 'cormorant' ? 'cormorant' : 'forum',
       // плотнее — там, где текст смотрят с мелкой сетки: обложка видео и подборка
       density: a.density >= 0 ? a.density : (type === 'video' || type === 'digest' ? 1 : 0),
-      mix: a.mix || 'genre', grain: !!a.grain, rawNums: !!a.rawNums,
+      field: T.FIELDS[state.field] && !(simple && state.field === 'cobalt') ? state.field : 'auto',
+      grain: a.grain !== false, rawNums: !!a.rawNums,
       typeStyle: v && T.TYPE_STYLES[v.style] ? v.style : 'poster', num: v ? String(v.num || '').trim() : '',
       maxLines: 2
     };
@@ -91,12 +92,12 @@
 
     // свечение: «Рампа» с картинкой, выбранное — без картинки, у служебных постов и подборки — нет
     function autoFx(kind) {
-      if (kind === 'type' || kind === 'vtype') return state.glow || 'depth';
+      if (kind === 'type' || kind === 'vtype') return T.FX[state.glow] ? state.glow : 'studio';
       if (kind === 'details') return 'depth';
       if (kind === 'frame' || kind === 'band' || kind === 'cover') return 'footlight';
       return 'none';
     }
-    function fxFor(kind) { return s.manualFx && s.manualFx !== 'auto' ? s.manualFx : autoFx(kind); }
+    function fxFor(kind) { return s.manualFx && s.manualFx !== 'auto' && T.FX[s.manualFx] ? s.manualFx : autoFx(kind); }
 
     if (layout === 'vtype') {
       s.slides = [{ kind: 'vtype', bars: '', fx: fxFor('vtype') }];
@@ -159,7 +160,7 @@
   function canvasClass(s, layout) {
     return ['smm-canvas', 'smm-canvas--' + s.format, s.theme === 'light' ? 'smm-canvas--light' : '',
       s.hue !== 'cool' ? 'smm-canvas--' + s.hue : '', s.wide ? '' : 'smm-canvas--tight',
-      'bx-tf-' + s.titleFont, s.density ? 'bx-d' + s.density : '', s.mix !== 'genre' ? 'bx-mix-' + s.mix : '',
+      'bx-tf-' + s.titleFont, s.density ? 'bx-d' + s.density : '', s.field !== 'auto' ? 'bx-field-' + s.field : '',
       s.grain ? 'bx-grain' : '', layout].filter(Boolean).join(' ');
   }
 

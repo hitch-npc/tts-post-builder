@@ -134,6 +134,7 @@
     if (spec.titleFont === 'cormorant' && (spec.layout === 'digest' || spec.layout === 'vtype' || spec.layout === 'type')) {
       add('info', 'Cormorant тонкий: на мелкой сетке ленты засечки теряются. Для подборок и обложек надёжнее Forum.');
     }
+    if (spec.field === 'cobalt') add('info', 'Кобальтовое поле — по решению владельца: в системе кобальт только у активной палочки. Держите его для редких серий.');
     if (spec.caps) add('warn', 'Название капсом. По правилу 14.3 названия событий пишутся обычным регистром.');
     var texts = [spec.kind, spec.title, spec.subline, spec.layout === 'album' ? spec.detailsLead : ''].concat((spec.items || []).map(function (i) { return i.title; }));
     if (texts.some(T.hasEmoji)) add('warn', 'Эмодзи на картинке. Им место в тексте поста, не на холсте.');

@@ -253,9 +253,9 @@
   }
   function paintVariants() {
     document.querySelectorAll('[data-var]').forEach(function (row, i) {
-      var k = row.getAttribute('data-var'), themes = [['dark', 'blobs', 'cw'], ['light', 'ribbon', 'cv'], ['dark', 'arch', 'cg'], ['light', 'curtain', 'cw'], ['dark', 'rays', 'cwg']];
+      var k = row.getAttribute('data-var'), themes = [['graphite', 'studio'], ['paper', 'window'], ['night', 'spot'], ['stone', 'vignette'], ['cobalt', 'edge']];
       var th = themes[i % themes.length];
-      var r = slideHtml(base(function (s) { s.type = 'video'; s.format = 'story'; s.theme = th[0]; s.glow = th[1]; s.adv.mix = th[2]; s.video.style = k; }), 0);
+      var r = slideHtml(base(function (s) { s.type = 'video'; s.format = 'story'; s.field = th[0]; s.theme = T.FIELDS[th[0]].theme; s.glow = th[1]; s.video.style = k; }), 0);
       row.innerHTML = scaledBox(r.html, 210, r.spec.H, 280) + '<div class="g-var-small">' + scaledBox(r.html, 116, r.spec.H, 155) + '</div>';
     });
   }
