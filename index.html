@@ -85,13 +85,22 @@
           <button class="chip" type="button" data-value="square" data-when="mode:advanced">1:1</button>
         </div>
       </div>
-      <div class="field"><span class="label">Тема</span>
+      <div class="field"><span class="label">Палитра</span>
+        <div class="chips" data-chips="palette" id="paletteChips"></div>
+        <p class="hint">Готовые сочетания темы, фона и цвета рисунка. В серии постов — одна палитра. У переноса и отмены цвет рисунка всё равно по смыслу.</p>
+      </div>
+      <div class="field" data-when="mode:advanced"><span class="label">Тонкая настройка</span>
+        <p class="hint">Тема, фон и цвет рисунка по отдельности. Сочетания, отмеченные «Нет» на сверке, конструктор подсветит предупреждением.</p>
+        <div class="btns"><button class="btn btn-ghost btn-sm" type="button" id="palSave">Сохранить как палитру</button>
+          <button class="btn btn-ghost btn-sm" type="button" id="palDel" data-when="pal:user">Удалить эту палитру</button></div>
+      </div>
+      <div class="field" data-when="mode:advanced"><span class="label">Тема</span>
         <div class="chips" data-chips="theme">
           <button class="chip" type="button" data-value="light">Светлая</button>
           <button class="chip" type="button" data-value="dark">Тёмная</button>
         </div>
       </div>
-      <div class="field"><span class="label">Фон</span>
+      <div class="field" data-when="mode:advanced"><span class="label">Фон</span>
         <div class="chips" data-chips="field">
           <button class="chip" type="button" data-value="auto">По теме</button>
           <button class="chip" type="button" data-value="paper">Бумага</button>
@@ -128,7 +137,7 @@
         <div data-when="art:glass,silk,rays,chrome,moon,smoke,steps,contour,grain,halftone"><button class="btn btn-ghost btn-sm" type="button" id="artNew">Другой рисунок</button>
         <p class="hint">Тот же вид, новый узор. Низ под текстом приглушён, у подборки — весь холст под списком.</p></div>
         <p class="hint" data-when="type:change">Цвет — по событию: перенос оранжевый, отмена красная.</p>
-        <p class="hint" data-when="type:announce,status,digest,video mode:simple">Цвет — от жанра. Свой цвет — в расширенном интерфейсе.</p>
+        <p class="hint" data-when="type:announce,status,digest,video mode:simple">Цвет — от палитры. Свой цвет — в расширенном интерфейсе.</p>
       </div>
       <div class="field" data-when="mode:advanced bg:art"><span class="label">Цвет рисунка</span>
         <div class="chips" data-chips="artHue">

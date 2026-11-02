@@ -25,12 +25,19 @@
   }
   function label(o) {
     var t = { status: 'Статус продаж', announce: 'Анонс', change: o.change === 'cancel' ? 'Отмена' : 'Перенос', digest: 'Подборка', video: 'Обложка видео' }[o.type || 'announce'];
+    if (o.pal) return ['Палитра «' + o.pal + '»', '«' + (T.ARTS[o.art] || '') + '»'].join(' · ');
     return [t, o.theme === 'light' ? 'светлая' : 'тёмная', 'фон ' + FIELD[o.field || 'auto'].toLowerCase(),
       (T.ART_HUES[o.hue || 'auto'] || '').toLowerCase(), '«' + (T.ARTS[o.art] || 'без рисунка') + '»'].concat(o.mark ? ['метка: ' + (MARKS[o.mark] || o.mark)] : []).join(' · ');
   }
 
   // наборы: тёмный фон × цвета бренда — главный вопрос; затем светлая тема и типы постов
   var SETS = [];
+  // палитры конструктора — первым набором: «Нет» уберёт палитру из списка
+  var e = Object.keys(T.PALETTES).map(function (k, i) {
+    var p = T.PALETTES[k];
+    return { pal: p.name, theme: p.theme, field: p.field, hue: p.hue, art: KINDS[(i * 3) % KINDS.length] };
+  });
+  SETS.push({ id: 'P', title: 'Палитры', note: 'Готовые сочетания в конструкторе. Цвет «по жанру» показан на театре. Оценивается сочетание, вид рисунка меняется.', items: e });
   var a = [];
   HUES.forEach(function (h, i) { a.push({ theme: 'dark', field: 'auto', hue: h, art: KINDS[i % KINDS.length] }); });
   HUES.forEach(function (h, i) { a.push({ theme: 'dark', field: 'night', hue: h, art: KINDS[(i + 4) % KINDS.length] }); });
@@ -59,7 +66,12 @@
 
   var votes = {};
   try { votes = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { votes = {}; }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(votes)); } catch (e) { /* без хранилища — оценки живут до перезагрузки */ } }
+  function save() {
+    // сочетания «тема|поле|цвет», отмеченные «Нет», — конструктор предупреждает о них
+    var avoid = {};
+    all.forEach(function (o) { if (!o.type && votes[o.id] === 'no') avoid[[o.theme || 'dark', o.field || 'auto', o.hue || 'auto'].join('|')] = true; });
+    try { localStorage.setItem(KEY, JSON.stringify(votes)); localStorage.setItem('tts-avoid', JSON.stringify(avoid)); } catch (e) { /* без хранилища — оценки живут до перезагрузки */ }
+  }
 
   var seq = 0;
   function uniq(html) { seq += 1; return html.replace(/ttsm(\d+)/g, 'ttsr' + seq + '_$1'); }

@@ -128,7 +128,8 @@
     var ART_LAYOUTS = { type: 1, vtype: 1, change: 1, digest: 1, collage: 1 };
     if (ART_LAYOUTS[layout] && T.ARTS && T.ARTS[artKind]) {
       // цвет: в расширенном интерфейсе — любой из цветов бренда, иначе по смыслу (жанр, перенос, отмена)
-      var pick = state.mode === 'advanced' && state.artHue && state.artHue !== 'auto' ? state.artHue : '';
+      // у переноса и отмены цвет по смыслу; свой — только вручную в расширенном интерфейсе
+      var pick = state.artHue && state.artHue !== 'auto' && (type !== 'change' || state.mode === 'advanced') ? state.artHue : '';
       if (pick === 'red' && type !== 'change') pick = '';   // красный — сигнал тревоги, только у переноса и отмены
       s.art = { kind: artKind, seed: state.artSeed || 1, hue: pick || s.hue,
         calm: layout === 'digest' || layout === 'collage' ? 'list' : layout === 'vtype' && s.typeStyle === 'center' ? 'mid' : 'low' };

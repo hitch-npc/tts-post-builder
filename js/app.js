@@ -91,6 +91,8 @@
     current = { spec: s, slides: slides, fit: fit, img: img };
     current.caption = T.captionText(state);
     current.checks = T.checks(state, s, fit, img);
+    var av = avoidNote();
+    if (av && s.art) current.checks.push({ level: 'warn', text: 'Это сочетание темы, фона и цвета на сверке отмечено «Нет»' + (av === true || av === 1 ? '' : ': ' + av) + '. Выберите палитру.' });
     current.blocked = current.checks.some(function (c) { return c.level === 'error'; });
   }
 
@@ -193,6 +195,33 @@
   }
 
   /* ── синхронизация панели ── */
+  /* ── палитры: встроенные + свои (хранятся в браузере) ── */
+  var PAL_KEY = 'tts-palettes', AVOID_KEY = 'tts-avoid';
+  function readJson(k, dflt) { try { return JSON.parse(localStorage.getItem(k) || 'null') || dflt; } catch (e) { return dflt; } }
+  var userPals = readJson(PAL_KEY, {});
+  function savePals() { try { localStorage.setItem(PAL_KEY, JSON.stringify(userPals)); } catch (e) { /* без хранилища — до перезагрузки */ } }
+  function palettes() { var o = {}; Object.keys(T.PALETTES).forEach(function (k) { o[k] = T.PALETTES[k]; }); Object.keys(userPals).forEach(function (k) { o[k] = userPals[k]; }); return o; }
+  function applyPalette(id) {
+    var p = palettes()[id]; if (!p) return;
+    state.palette = id; state.theme = p.theme; state.field = p.field; state.artHue = p.hue;
+  }
+  // палитра, которой соответствует текущее сочетание, — или custom
+  function matchPalette() {
+    var all = palettes(), hit = Object.keys(all).filter(function (k) { var p = all[k]; return p.theme === state.theme && p.field === state.field && p.hue === (state.artHue || 'auto'); });
+    return hit.indexOf(state.palette) !== -1 ? state.palette : hit[0] || 'custom';
+  }
+  function renderPalettes() {
+    var all = palettes(), html = Object.keys(all).map(function (k) {
+      return '<button class="chip" type="button" data-value="' + T.esc(k) + '">' + T.esc(all[k].name) + '</button>';
+    }).join('');
+    if (state.palette === 'custom') html += '<button class="chip" type="button" data-value="custom">Своя настройка</button>';
+    var box = $('paletteChips'); if (box.innerHTML !== html) box.innerHTML = html;
+  }
+  function avoidNote() {
+    var key = [state.theme, state.field, state.artHue || 'auto'].join('|');
+    return T.AVOID[key] || readJson(AVOID_KEY, {})[key] || '';
+  }
+
   function getPath(obj, path) { return path.split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, obj); }
   function setPath(obj, path, val) {
     var ks = path.split('.'), o = obj;
@@ -207,6 +236,7 @@
       shape: state.collage.shape, clgrid: state.collage.grid || 'stack', art: state.art || 'glass',
       bg: { type: 1, vtype: 1, change: 1, digest: 1, collage: 1 }[layout] && (state.art || 'glass') !== 'none' ? 'art' : 'flat',
       titleSize: state.adv.titleSize ? 'manual' : 'auto',
+      pal: userPals[state.palette] ? 'user' : state.palette === 'custom' ? 'custom' : 'sys',
       customRows: state.adv.customRows ? 'yes' : 'no',
       exportType: state.adv.exportType
     };
@@ -227,6 +257,7 @@
     });
   }
   function syncControls() {
+    renderPalettes();
     var c = conditions();
     document.querySelectorAll('[data-when]').forEach(function (el) { el.hidden = !visible(el, c); });
     syncChips();
@@ -330,6 +361,8 @@
       // поле задаёт тему (светлое — светлая), а выбор темы возвращает поле «по теме»
       if (key === 'field' && T.FIELDS[v] && T.FIELDS[v].theme) state.theme = T.FIELDS[v].theme;
       if (key === 'theme') state.field = 'auto';
+      if (key === 'palette') applyPalette(v);
+      if (key === 'theme' || key === 'field' || key === 'artHue') state.palette = matchPalette();
       // обложка видео вертикальная — сразу 9:16
       if (key === 'type' && v === 'video' && state.format === 'post') state.format = 'story';
       update({ lists: false });
@@ -372,6 +405,17 @@
       state.collage[ck] = T.clone(T.DEFAULTS.collage[ck]);
       if (cold && cold !== 'example') T.images.drop(cold);
       update(); return;
+    }
+    if (e.target.closest('#palSave')) {
+      var name = (window.prompt('Название палитры', 'Моя палитра') || '').trim().slice(0, 32);
+      if (!name) return;
+      var id = 'u' + Date.now().toString(36);
+      userPals[id] = { name: name, theme: state.theme, field: state.field, hue: state.artHue || 'auto' };
+      savePals(); state.palette = id; update(); toast('Палитра сохранена в этом браузере'); return;
+    }
+    if (e.target.closest('#palDel')) {
+      if (!userPals[state.palette] || !window.confirm('Удалить палитру «' + userPals[state.palette].name + '»?')) return;
+      delete userPals[state.palette]; savePals(); state.palette = matchPalette(); update(); return;
     }
     if (e.target.closest('#artNew')) { state.artSeed = 1 + Math.floor(Math.random() * 996); update(); return; }
     if (e.target.closest('#clTear')) { state.collage.seed = Math.floor(Math.random() * 1e9); update(); return; }
@@ -617,6 +661,7 @@
   $('appLogo').innerHTML = T.logo();
   T.loadState().then(function (s) {
     state = s;
+    if (!state.palette || (state.palette !== 'custom' && !palettes()[state.palette])) state.palette = matchPalette();
     var refs = state.digest.items.map(function (it) { return it.image && it.image.ref; })
       .concat([state.collage.p1.ref, state.collage.p2.ref]).filter(Boolean);
     return Promise.all([T.images.load(state.event.image.ref)].concat(refs.map(function (r) { return T.images.load(r); })));

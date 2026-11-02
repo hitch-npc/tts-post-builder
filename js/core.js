@@ -67,6 +67,22 @@
     auto: { name: 'По теме' }, paper: { name: 'Бумага', theme: 'light' }, stone: { name: 'Камень', theme: 'light' },
     graphite: { name: 'Графит', theme: 'dark' }, night: { name: 'Ночь', theme: 'dark' }, cobalt: { name: 'Кобальт', theme: 'dark' }
   };
+  /* Палитры: проверенные сочетания темы, поля и цвета рисунка. Выбор в один клик держит серию в одном стиле;
+     ручная настройка — в расширенном интерфейсе («Тонкая настройка»). hue: auto — цвет от жанра. */
+  T.PALETTES = {
+    genre:     { name: 'По жанру',           theme: 'dark',  field: 'auto',     hue: 'auto' },
+    night:     { name: 'Ночь в цвет жанра',  theme: 'dark',  field: 'night',    hue: 'auto' },
+    gold:      { name: 'Ночь и золото',      theme: 'dark',  field: 'night',    hue: 'gold' },
+    cobalt:    { name: 'Графит и кобальт',   theme: 'dark',  field: 'graphite', hue: 'cobalt' },
+    silver:    { name: 'Чернила и серебро',  theme: 'dark',  field: 'auto',     hue: 'silver' },
+    violet:    { name: 'Ночь и фиолетовый',  theme: 'dark',  field: 'night',    hue: 'violet' },
+    teal:      { name: 'Графит и бирюза',    theme: 'dark',  field: 'graphite', hue: 'teal' },
+    paper:     { name: 'Бумага и кобальт',   theme: 'light', field: 'paper',    hue: 'cobalt' },
+    stone:     { name: 'Камень и золото',    theme: 'light', field: 'stone',    hue: 'gold' },
+    light:     { name: 'Светлая в цвет жанра', theme: 'light', field: 'auto',   hue: 'auto' }
+  };
+  // Сочетания, отмеченные «Нет» на сверке, — конструктор предупреждает о них. Ключ: тема|поле|цвет.
+  T.AVOID = {};
   T.TITLE_FONTS = { forum: 'Forum', cormorant: 'Cormorant' };
   // Типографика обложки видео
   T.TYPE_STYLES = {
@@ -116,7 +132,8 @@
     art: 'glass',            // рисунок фона без картинки (T.ARTS); 'none' — вернуть свечение
     artSeed: 1,              // номер узора: «Другой рисунок» меняет его
     markColor: 'invert',     // метка статуса: invert — инверсия, art — как рисунок, или тег ядра (T.MARK_COLORS)
-    artHue: 'auto',          // цвет рисунка (T.ART_HUES); выбор — только в расширенном интерфейсе
+    artHue: 'auto',          // цвет рисунка (T.ART_HUES); задаёт палитра, вручную — в расширенном интерфейсе
+    palette: 'genre',        // палитра (T.PALETTES или своя u…); custom — настроено вручную
     field: 'auto',
     status: 'start',
     event: {
