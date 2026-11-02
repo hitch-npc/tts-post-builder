@@ -1,0 +1,166 @@
+/* Конструктор постов TTS — расширение холста поверх SMM-слоя (ds/ds-smm.css).
+   Здесь то, чего в слое дизайн-системы пока нет: Forum в названиях, цифры без старостильных форм, плотность начертания,
+   новые рисунки свечения со смешением цветов, зерно и обложка видео. Не меняет ds-smm.css; подключается после него. */
+
+/* ───── Шрифты: названия и даты — Forum ─────
+   Cormorant тонкий и на мелкой сетке ленты рассыпается, а его цифры по умолчанию старостильные («11» → «ıı»).
+   Forum плотнее, штрих ровнее, цифры прописные. Числа — всегда в Forum, в любом начертании названия. */
+.smm-canvas { --smm-f-num: 'Forum', 'Manrope', serif; --bx-f-num: 'Forum', 'Manrope', serif; }
+.smm-canvas.bx-tf-forum { --smm-f-display: 'Forum', serif; }
+.smm-canvas.bx-tf-cormorant { --smm-f-display: 'Cormorant Garamond', serif; }
+.bx-n { font-family: var(--bx-f-num); font-variant-numeric: lining-nums; font-weight: 400; }
+/* Forum один — 400; вес 500 из слоя дизайн-системы ему не нужен */
+.bx-tf-forum .smm-title, .bx-tf-forum .smm-dg-title { font-weight: 400; }
+.smm-title { letter-spacing: -.005em; }
+.bx-tf-forum .smm-title--caps { letter-spacing: .01em; }
+/* Forum крупнее Cormorant при том же кегле — подборка и новая дата чуть тише */
+.bx-tf-forum .smm-dg-title { font-size: 48px; line-height: 1.08; }
+.bx-tf-forum .smm-dg-thumbs .smm-dg-title { font-size: 42px; }
+.bx-tf-forum .smm-dg-when .smm-num { font-size: 50px; }
+.smm-dg-when .smm-label { color: var(--smm-muted); }
+
+/* ───── Плотность: Forum один, поэтому «жирность» — тонкий контур по цвету текста ─────
+   Помогает названию и датам держаться на сетке 3:4 в ленте. 0 — обычная, 1 — плотная, 2 — жирная. */
+.bx-d1 :is(.smm-title, .smm-dg-title, .smm-big, .smm-num, .bx-numeral) { -webkit-text-stroke: .016em currentColor; }
+.bx-d2 :is(.smm-title, .smm-dg-title, .smm-big, .smm-num, .bx-numeral) { -webkit-text-stroke: .034em currentColor; }
+.bx-d1 .smm-dg-title, .bx-d1 .smm-num { -webkit-text-stroke-width: .022em; }
+.bx-d2 .smm-dg-title, .bx-d2 .smm-num { -webkit-text-stroke-width: .045em; }
+
+/* ───── Смешение цветов свечения ─────
+   --bx-h1…h3 — три цвета рисунка. Стандарт (один цвет жанра) — все три равны цвету жанра. */
+.smm-canvas {
+  --bx-cool: var(--smm-dark-hue-cool); --bx-warm: var(--smm-dark-hue-warm); --bx-green: var(--smm-dark-hue-green);
+  --bx-violet: color-mix(in srgb, #7A4DFF 62%, var(--smm-bg));
+  --bx-h1: var(--smm-hue); --bx-h2: var(--smm-hue); --bx-h3: var(--smm-hue);
+}
+.smm-canvas--light {
+  --bx-cool: var(--smm-light-hue-cool); --bx-warm: var(--smm-light-hue-warm); --bx-green: var(--smm-light-hue-green);
+  --bx-violet: color-mix(in srgb, #8B5CF6 38%, var(--smm-bg));
+}
+.smm-canvas.bx-mix-cw  { --bx-h1: var(--bx-cool); --bx-h2: var(--bx-warm); --bx-h3: color-mix(in srgb, var(--bx-cool) 50%, var(--bx-warm)); --smm-hue: var(--bx-h1); }
+.smm-canvas.bx-mix-cg  { --bx-h1: var(--bx-cool); --bx-h2: var(--bx-green); --bx-h3: color-mix(in srgb, var(--bx-cool) 50%, var(--bx-green)); --smm-hue: var(--bx-h1); }
+.smm-canvas.bx-mix-wg  { --bx-h1: var(--bx-warm); --bx-h2: var(--bx-green); --bx-h3: color-mix(in srgb, var(--bx-warm) 50%, var(--bx-green)); --smm-hue: var(--bx-h1); }
+.smm-canvas.bx-mix-cv  { --bx-h1: var(--bx-cool); --bx-h2: var(--bx-violet); --bx-h3: color-mix(in srgb, var(--bx-cool) 50%, var(--bx-violet)); --smm-hue: var(--bx-h1); }
+.smm-canvas.bx-mix-cwg { --bx-h1: var(--bx-cool); --bx-h2: var(--bx-warm); --bx-h3: var(--bx-green); --smm-hue: var(--bx-h1); }
+.smm-canvas.bx-mix-mono {
+  --bx-h1: color-mix(in srgb, var(--smm-fg) 22%, var(--smm-bg)); --bx-h2: color-mix(in srgb, var(--smm-fg) 12%, var(--smm-bg));
+  --bx-h3: color-mix(in srgb, var(--smm-fg) 32%, var(--smm-bg)); --smm-hue: var(--bx-h1);
+}
+
+/* ───── Новые рисунки свечения ───── */
+.smm-fx > i { position: absolute; display: block; pointer-events: none; }
+.smm-fx--blobs, .smm-fx--orbit, .smm-fx--arch, .smm-fx--ribbon, .smm-fx--rays, .smm-fx--curtain { --bx-a: 1; }
+
+/* «Пятна» — три органичных пятна разной формы и цвета, края размыты */
+.smm-fx--blobs > i { filter: blur(36px); aspect-ratio: 1; }
+.smm-fx--blobs > i:nth-child(1) {
+  width: 84%; right: -30%; bottom: -16%; transform: rotate(18deg); border-radius: 58% 42% 63% 37% / 41% 58% 42% 59%;
+  background: radial-gradient(62% 62% at 46% 46%, var(--bx-h1) 0%, color-mix(in srgb, var(--bx-h1) 45%, transparent) 62%, transparent 100%);
+}
+.smm-fx--blobs > i:nth-child(2) {
+  width: 62%; left: -22%; bottom: 26%; transform: rotate(-24deg); border-radius: 46% 54% 38% 62% / 58% 36% 64% 42%;
+  background: radial-gradient(60% 60% at 52% 48%, var(--bx-h2) 0%, color-mix(in srgb, var(--bx-h2) 40%, transparent) 64%, transparent 100%);
+}
+.smm-fx--blobs > i:nth-child(3) {
+  width: 38%; right: 6%; top: 14%; transform: rotate(40deg); border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+  background: radial-gradient(60% 60% at 50% 50%, var(--bx-h3) 0%, color-mix(in srgb, var(--bx-h3) 35%, transparent) 66%, transparent 100%);
+}
+
+/* «Лучи» — веер лучей из верхнего угла, как свет из-под колосников */
+.smm-fx--rays { -webkit-mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 82%); mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 82%); }
+.smm-fx--rays > i { left: -20%; top: -12%; width: 140%; height: 140%; filter: blur(9px); }
+.smm-fx--rays > i:nth-child(1) {
+  background: conic-gradient(from 118deg at 14% 0%, transparent 0 4deg,
+    color-mix(in srgb, var(--bx-h1) 92%, transparent) 4deg 8deg, transparent 8deg 15deg,
+    color-mix(in srgb, var(--bx-h1) 70%, transparent) 15deg 24deg, transparent 24deg 35deg,
+    color-mix(in srgb, var(--bx-h1) 85%, transparent) 35deg 38deg, transparent 38deg 100%);
+}
+.smm-fx--rays > i:nth-child(2) {
+  background: conic-gradient(from 118deg at 14% 0%, transparent 0 10deg,
+    color-mix(in srgb, var(--bx-h2) 78%, transparent) 10deg 13deg, transparent 13deg 28deg,
+    color-mix(in srgb, var(--bx-h2) 60%, transparent) 28deg 34deg, transparent 34deg 46deg,
+    color-mix(in srgb, var(--bx-h2) 88%, transparent) 46deg 50deg, transparent 50deg 100%);
+}
+.smm-fx--rays > i:nth-child(3) {
+  left: -30%; top: -30%; width: 70%; height: 60%; border-radius: 50%; filter: blur(40px);
+  background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--bx-h3) 90%, transparent), transparent 70%);
+}
+
+/* «Орбиты» — концентрические кольца и точка света, геометрия без размытия */
+.smm-fx--orbit > i { border-radius: 9999px; aspect-ratio: 1; }
+.smm-fx--orbit > i:nth-child(1) { width: 150%; left: -10%; top: 38%; border: 3px solid color-mix(in srgb, color-mix(in srgb, var(--bx-h1) 62%, var(--smm-fg)) 70%, transparent); }
+.smm-fx--orbit > i:nth-child(2) { width: 104%; left: 18%; top: 54%; border: 3px solid color-mix(in srgb, color-mix(in srgb, var(--bx-h2) 62%, var(--smm-fg)) 55%, transparent); }
+.smm-fx--orbit > i:nth-child(3) {
+  width: 62%; left: 42%; top: 66%; filter: blur(14px);
+  background: radial-gradient(50% 50% at 50% 50%, var(--bx-h3) 0%, color-mix(in srgb, var(--bx-h3) 50%, transparent) 55%, transparent 100%);
+}
+
+/* «Арка» — сцена-портал: две вложенные арки света и пол */
+.smm-fx--arch > i:nth-child(1) {
+  left: 8%; right: 8%; bottom: -6%; height: 78%; border-radius: 9999px 9999px 0 0; filter: blur(26px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bx-h1) 70%, transparent) 0%, var(--bx-h1) 100%);
+}
+.smm-fx--arch > i:nth-child(2) {
+  left: 24%; right: 24%; bottom: -6%; height: 56%; border-radius: 9999px 9999px 0 0; filter: blur(30px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bx-h2) 60%, transparent) 0%, var(--bx-h2) 100%);
+}
+.smm-fx--arch > i:nth-child(3) {
+  left: -10%; right: -10%; bottom: -14%; height: 26%; filter: blur(28px);
+  background: radial-gradient(50% 60% at 50% 100%, var(--bx-h3) 0%, transparent 100%);
+}
+
+/* «Лента» — две-три диагональные полосы, как шёлк на сцене */
+.smm-fx--ribbon > i { left: -30%; width: 160%; transform: rotate(-22deg); filter: blur(28px); }
+.smm-fx--ribbon > i:nth-child(1) { top: 46%; height: 24%; background: linear-gradient(90deg, transparent 0%, var(--bx-h1) 38%, var(--bx-h2) 72%, transparent 100%); }
+.smm-fx--ribbon > i:nth-child(2) { top: 72%; height: 12%; background: linear-gradient(90deg, transparent 6%, var(--bx-h2) 46%, var(--bx-h3) 80%, transparent 100%); }
+.smm-fx--ribbon > i:nth-child(3) { top: 26%; height: 8%; opacity: .7; background: linear-gradient(90deg, transparent 20%, var(--bx-h3) 60%, transparent 100%); }
+
+/* «Занавес» — вертикальные складки, свет уходит вверх */
+.smm-fx--curtain > i { top: 0; bottom: 0; filter: blur(12px); -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%); mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%); }
+.smm-fx--curtain > i:nth-child(1) { left: -4%; right: -4%; background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--bx-h1) 86%, transparent) 0 7%, transparent 7% 15%); }
+.smm-fx--curtain > i:nth-child(2) { left: 4%; right: -4%; opacity: .75; background: repeating-linear-gradient(90deg, transparent 0 7%, color-mix(in srgb, var(--bx-h2) 80%, transparent) 7% 11%, transparent 11% 15%); }
+.smm-fx--curtain > i:nth-child(3) { left: 0; right: 0; bottom: -8%; top: auto; height: 30%; background: radial-gradient(60% 80% at 50% 100%, var(--bx-h3), transparent 100%); -webkit-mask-image: none; mask-image: none; filter: blur(24px); }
+
+/* ───── Зерно ───── */
+.smm-canvas.bx-grain::after {
+  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: .07; background-size: 300px 300px;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* на светлом фоне зерно заметнее выдерживает больше */
+.smm-canvas--light.bx-grain::after { opacity: .16; }
+
+/* ───── Обложка видео: «только заголовок» ─────
+   В сетке профиля обложка 9:16 видна 3:4 по центру: верх и низ по 240 px срезаются, поля сторис (262 / 250) это учитывают.
+   Название — Forum, крупно; кроме него — надзаголовок и одна строка. */
+.smm-vt { justify-content: space-between; }
+.smm-vt > .smm-head { margin-bottom: 0; }
+.smm-vt .smm-text { flex: none; width: 100%; }
+.smm-vt .smm-title { line-height: .94; letter-spacing: -.012em; text-wrap: balance; overflow-wrap: normal; }
+.smm-vt .smm-eyebrow { margin-bottom: 36px; font-size: 30px; }
+.smm-vt .smm-line { margin-top: 44px; font-size: 36px; color: var(--smm-muted); }
+
+/* «Колонка» */
+.smm-vt--stack .smm-title { line-height: .88; letter-spacing: -.02em; }
+.smm-vt--stack .bx-w { display: block; }
+
+/* «Контраст» */
+.smm-vt--contrast .smm-title { line-height: .92; }
+.smm-vt--contrast .bx-w1 { display: block; font-size: 1.95em; line-height: .86; letter-spacing: -.025em; margin-left: -.03em; }
+.smm-vt--contrast .bx-rest { display: block; margin-top: .08em; }
+
+/* «Центр» */
+.smm-vt--center .smm-text { margin-block: auto; align-items: center; text-align: center; }
+.smm-vt--center .smm-text::before, .smm-vt--center .smm-text::after { content: ""; width: 112px; height: 3px; background: var(--smm-fg); }
+.smm-vt--center .smm-text::before { margin-bottom: 64px; }
+.smm-vt--center .smm-text::after { margin-top: 64px; }
+.smm-vt--center .smm-eyebrow { margin-bottom: 40px; }
+.smm-vt--center .smm-line { margin-top: 40px; }
+.smm-vt--center .smm-title { text-wrap: balance; }
+
+/* «Номер» */
+.bx-numeral { font-family: var(--smm-f-display); font-size: calc(var(--bx-ts, 120px) * 3.9); line-height: .78; letter-spacing: -.04em; margin: 8px 0 40px -.03em; color: var(--smm-fg); }
+.smm-vt--numeral .smm-title { line-height: 1; }
+
+/* ───── Обложка видео «кадр сверху» и общий минимализм ───── */
+.smm-band .smm-line:empty { display: none; }

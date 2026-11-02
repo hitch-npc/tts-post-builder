@@ -8,7 +8,7 @@
   var esc = T.esc, br = T.br, fmt = T.fmt;
 
   // Кегль названия по шкале smm.tokens.json
-  var BASE = { frame: 118, band: 118, cover: 118, details: 102, change: 94, digest: 94, type: 150 };
+  var BASE = { frame: 118, band: 118, cover: 118, details: 102, change: 94, digest: 94, type: 150, vtype: 118 };
   var NB = ' ';
 
   /* ── спека: всё, что нужно холсту, уже посчитано и выверено ── */
@@ -20,7 +20,9 @@
     var e = state.event, f = state.format;
     if (simple && f === 'square') f = 'post';
     var type = state.type;
-    var layout = type === 'change' ? 'change' : type === 'digest' ? 'digest' : state.layout;
+    var v = state.video;
+    var layout = type === 'change' ? 'change' : type === 'digest' ? 'digest'
+      : type === 'video' ? (v.layout === 'band' ? 'band' : 'vtype') : state.layout;
     var wide = a.margins !== 'tight';
     var X = wide ? T.MARGINS.wide : T.MARGINS.tight;
     var story = f === 'story';
@@ -37,8 +39,19 @@
       age: e.age || '',
       image: { src: env && env.src ? env.src(e.image.ref) : '', x: e.image.x, y: e.image.y, zoom: e.image.zoom, ref: e.image.ref },
       imageSize: a.imageSize, logoTone: a.logoTone,
-      manualBars: a.slides, manualFx: a.fx
+      manualBars: a.slides, manualFx: a.fx,
+      titleFont: a.titleFont === 'cormorant' ? 'cormorant' : 'forum',
+      // плотнее — там, где текст смотрят с мелкой сетки: обложка видео и подборка
+      density: a.density >= 0 ? a.density : (type === 'video' || type === 'digest' ? 1 : 0),
+      mix: a.mix || 'genre', grain: !!a.grain, rawNums: !!a.rawNums,
+      typeStyle: v && T.TYPE_STYLES[v.style] ? v.style : 'poster', num: v ? String(v.num || '').trim() : '',
+      maxLines: 2
     };
+    if (type === 'video') {
+      s.kind = ty(v.kind); s.title = ty(v.title); s.age = '';
+      s.line = ty(v.line);
+      if (layout === 'vtype') s.maxLines = T.VT_LINES[s.typeStyle];
+    }
     if (type === 'status') s.mark = T.STATUSES[state.status].name;
     if (type === 'change') s.mark = T.CHANGES[state.change.kind].name;
 
@@ -78,14 +91,16 @@
 
     // свечение: «Рампа» с картинкой, выбранное — без картинки, у служебных постов и подборки — нет
     function autoFx(kind) {
-      if (kind === 'type') return state.glow || 'depth';
+      if (kind === 'type' || kind === 'vtype') return state.glow || 'depth';
       if (kind === 'details') return 'depth';
       if (kind === 'frame' || kind === 'band' || kind === 'cover') return 'footlight';
       return 'none';
     }
     function fxFor(kind) { return s.manualFx && s.manualFx !== 'auto' ? s.manualFx : autoFx(kind); }
 
-    if (layout === 'album') {
+    if (layout === 'vtype') {
+      s.slides = [{ kind: 'vtype', bars: '', fx: fxFor('vtype') }];
+    } else if (layout === 'album') {
       s.slides = [{ kind: 'cover', bars: '1/2', fx: fxFor('cover') }, { kind: 'details', bars: '2/2', fx: fxFor('details') }];
     } else {
       var bars = s.manualBars && s.manualBars !== 'auto' && s.manualBars !== '0' ? s.manualBars : '';
@@ -112,7 +127,12 @@
     var age = s.age ? '<span class="smm-age">' + esc(s.age) + '</span>' : '';
     return '<div class="smm-head"><span class="smm-logo">' + logo() + '</span><div class="smm-meta">' + age + bars(b) + '</div></div>';
   }
-  function fx(name) { return name && name !== 'none' ? '<div class="smm-fx smm-fx--' + name + '"></div>' : ''; }
+  function fx(name) {
+    if (!name || name === 'none') return '';
+    return '<div class="smm-fx smm-fx--' + name + '">' + (T.FX_LAYERED[name] ? '<i></i><i></i><i></i>' : '') + '</div>';
+  }
+  // Название: цифры — в «прописном» начертании, иначе Cormorant рисует их старостильными
+  function nums(s, raw) { return s.rawNums ? esc(raw) : T.numsHtml(raw); }
   function img(s) {
     var i = s.image, pos = i.x + '% ' + i.y + '%';
     return '<div class="smm-img" data-drag="event"><img src="' + esc(i.src) + '" alt="" style="object-position:' + pos +
@@ -122,13 +142,25 @@
     if (s.mark) return '<span class="smm-mark">' + esc(s.mark) + '</span>';
     return s.kind ? '<span class="smm-eyebrow">' + esc(s.kind) + '</span>' : '';
   }
+  // Разметка названия обложки: «Колонка» — слово на строку, «Контраст» — первое слово крупнее остальных
+  function titleHtml(s) {
+    if (s.layout !== 'vtype') return nums(s, s.title);
+    var words = s.title.split(/ +/).filter(Boolean);
+    if (s.typeStyle === 'stack') return words.map(function (w) { return '<span class="bx-w">' + nums(s, w) + '</span>'; }).join('');
+    if (s.typeStyle === 'contrast' && words.length > 1) {
+      return '<span class="bx-w1">' + nums(s, words[0]) + '</span><span class="bx-rest">' + nums(s, words.slice(1).join(' ')) + '</span>';
+    }
+    return nums(s, s.title);
+  }
   function title(s, size, extra) {
-    return '<h2 class="smm-title' + (extra || '') + (s.caps ? ' smm-title--caps' : '') + '" data-title style="font-size:' + size + 'px">' + esc(s.title) + '</h2>';
+    return '<h2 class="smm-title' + (extra || '') + (s.caps ? ' smm-title--caps' : '') + '" data-title style="font-size:' + size + 'px">' + titleHtml(s) + '</h2>';
   }
   function line(text) { return text ? '<p class="smm-line">' + esc(text) + '</p>' : ''; }
   function canvasClass(s, layout) {
     return ['smm-canvas', 'smm-canvas--' + s.format, s.theme === 'light' ? 'smm-canvas--light' : '',
-      s.hue !== 'cool' ? 'smm-canvas--' + s.hue : '', s.wide ? '' : 'smm-canvas--tight', layout].filter(Boolean).join(' ');
+      s.hue !== 'cool' ? 'smm-canvas--' + s.hue : '', s.wide ? '' : 'smm-canvas--tight',
+      'bx-tf-' + s.titleFont, s.density ? 'bx-d' + s.density : '', s.mix !== 'genre' ? 'bx-mix-' + s.mix : '',
+      s.grain ? 'bx-grain' : '', layout].filter(Boolean).join(' ');
   }
 
   /* ── слайды ── */
@@ -182,11 +214,16 @@
         }
         return '<div class="smm-rule"></div>' + thumb +
           '<div class="smm-dg-when"><span class="smm-num">' + esc(it.day) + '</span>' + (it.time ? '<span class="smm-label">' + esc(it.time) + '</span>' : '') + '</div>' +
-          '<div class="smm-dg-what"><div class="smm-dg-title">' + esc(it.title) + '</div>' + (it.venue ? '<div class="smm-dg-meta">' + esc(it.venue) + '</div>' : '') + '</div>';
+          '<div class="smm-dg-what"><div class="smm-dg-title">' + nums(s, it.title) + '</div>' + (it.venue ? '<div class="smm-dg-meta">' + esc(it.venue) + '</div>' : '') + '</div>';
       }).join('');
       return '<div class="' + canvasClass(s, 'smm-sheet') + '">' + fx(sl.fx) + head(s, sl.bars) +
         '<div class="smm-grid' + (s.thumbs ? ' smm-dg-thumbs' : '') + '" data-limit="' + lim + '">' + title(s, ts, ' smm-span') +
           '<div class="smm-gap"></div>' + items + '</div></div>';
+    }
+    if (k === 'vtype') {
+      var numeral = s.typeStyle === 'numeral' && s.num ? '<div class="bx-numeral" aria-hidden="true">' + nums(s, s.num) + '</div>' : '';
+      return '<div class="' + canvasClass(s, 'smm-sheet smm-vt smm-vt--' + s.typeStyle) + '">' + fx(sl.fx) + head(s, sl.bars) +
+        '<div class="smm-text" data-limit="' + lim + '" style="--bx-ts:' + ts + 'px">' + kicker(s) + numeral + title(s, ts) + line(s.subline) + '</div></div>';
     }
     // type — без картинки, крупное название на свечении
     return '<div class="' + canvasClass(s, 'smm-sheet smm-type') + '">' + fx(sl.fx) + head(s, sl.bars) +
@@ -212,16 +249,17 @@
   // Рендер одного слайда с подгонкой названия. Возвращает кегль (по шкале основного макета), вылет и число строк.
   T.layout = function (s, i, host, scale) {
     var kind = (s.slides[i] || s.slides[0]).kind;
-    var start = s.titleSize || BASE.frame;
+    var start = s.titleSize || (kind === 'vtype' ? T.VT_SIZE[s.typeStyle] : BASE.frame);
     // без картинки название крупнее и может уменьшаться сильнее, оставаясь крупным
-    var min = Math.max(kind === 'type' ? 64 : 72, Math.round(start * (kind === 'type' ? 0.55 : 0.68)));
+    var big = kind === 'type' || kind === 'vtype';
+    var min = Math.max(big ? 64 : 72, Math.round(start * (big ? 0.55 : 0.68)));
     var size = start, over, lines;
     for (;;) {
       host.innerHTML = T.renderSlide(s, i, size);
       var p = host.firstElementChild;
       over = overflowOf(p, scale || 1);
       lines = titleLines(p);
-      if ((!over && lines <= 2) || size <= min) break;
+      if ((!over && lines <= (s.maxLines || 2)) || size <= min) break;
       size = Math.max(min, size - 4);
     }
     var px = function (v) { return Math.round(v * BASE[kind] / BASE.frame); };

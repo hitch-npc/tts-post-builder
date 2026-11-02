@@ -109,7 +109,11 @@
     var H = s.H, out = '<div class="g-box" style="height:' + H + 'px">';
     // поля холста
     out += '<div class="g-margin" style="left:' + s.x + 'px;right:' + s.x + 'px;top:' + s.pt + 'px;bottom:' + s.pb + 'px"></div>';
-    if (s.format === 'story') {
+    if (s.format === 'story' && state.type === 'video') {
+      var vc = Math.round((H - 1440) / 2);
+      out += '<div class="g-cut" style="top:0;height:' + vc + 'px;left:0;right:0"><span>Сетка профиля 3:4 срежет</span></div>';
+      out += '<div class="g-cut" style="bottom:0;height:' + vc + 'px;left:0;right:0"><span>Сетка профиля 3:4 срежет</span></div>';
+    } else if (s.format === 'story') {
       out += '<div class="g-cut" style="top:0;height:' + s.pt + 'px;left:0;right:0"><span>Интерфейс сторис</span></div>';
       out += '<div class="g-cut" style="bottom:0;height:' + s.pb + 'px;left:0;right:0"><span>Строка ответа</span></div>';
     } else {
@@ -154,7 +158,8 @@
       var html = '';
       if (story) {
         ctx.platform = tab === 'tg' ? 'tg' : 'ig';
-        html = tab === 'grid' ? '<p class="pv-note pv-solo">Сторис не попадают в сетку профиля. Чтобы посмотреть пост в сетке, выберите формат «Пост 4:5».</p>'
+        ctx.video = state.type === 'video';
+        html = tab === 'grid' ? (ctx.video ? T.previewGrid(ctx) : '<p class="pv-note pv-solo">Сторис не попадают в сетку профиля. Чтобы посмотреть пост в сетке, выберите формат «Пост 4:5».</p>')
           : T.previewStory(ctx);
       } else if (tab === 'tg') {
         html = '<div class="chips pv-switch" data-chips="tgTheme"><button class="chip" type="button" data-value="dark">Тёмный Telegram</button><button class="chip" type="button" data-value="light">Светлый</button></div>' +
@@ -191,9 +196,10 @@
     o[ks[ks.length - 1]] = val;
   }
   function conditions() {
-    var layout = state.type === 'change' || state.type === 'digest' ? state.type : state.layout;
+    var layout = state.type === 'change' || state.type === 'digest' ? state.type
+      : state.type === 'video' ? (state.video.layout === 'band' ? 'band' : 'vtype') : state.layout;
     return {
-      mode: state.mode, type: state.type, layout: layout, format: state.format, kind: state.change.kind,
+      mode: state.mode, type: state.type, layout: layout, format: state.format, kind: state.change.kind, style: state.video.style,
       titleSize: state.adv.titleSize ? 'manual' : 'auto',
       customRows: state.adv.customRows ? 'yes' : 'no',
       exportType: state.adv.exportType
@@ -241,8 +247,11 @@
       announce: 'Новое событие: название и одна строка — когда и где. Остальное — в тексте поста.',
       status: 'Тот же анонс с меткой над названием: старт продаж, мало мест или последние билеты.',
       change: 'Служебный пост без картинки и свечения: новая дата и что делать с билетами.',
-      digest: '3–5 событий одним списком. Картинки у событий — по желанию: превью слева.'
+      digest: '3–5 событий одним списком. Картинки у событий — по желанию: превью слева.',
+      video: 'Обложка для рилс, сторис и видео в канале: рубрика, название и одна строка. Крупно и тихо — в сетке профиля она размером с ноготь.'
     }[state.type];
+    var st = T.TYPE_STYLES[state.video.style];
+    $('styleHint').textContent = st ? st.hint : '';
     var e = state.event;
     $('imgInfo').textContent = e.image.ref === 'example' ? 'Сейчас стоит картинка-пример.' : '';
   }
@@ -308,6 +317,8 @@
       if (key === 'status' && Object.keys(T.STATUSES).some(function (k) { return T.STATUSES[k].why === state.caption.why; })) state.caption.why = '';
       setPath(state, key, v);
       if (key === 'layout' || key === 'type') state.slide = 1;
+      // обложка видео вертикальная — сразу 9:16
+      if (key === 'type' && v === 'video' && state.format === 'post') state.format = 'story';
       update({ lists: false });
       return;
     }
@@ -534,7 +545,7 @@
       .then(function () { return deliver(files); })
       .then(function () {
         toast(files.length > 1 ? 'Готово: ' + files.length + ' файла' : 'Готово');
-        if (s.format !== 'story') {
+        if (s.format !== 'story' || state.type === 'video') {
           return T.thumb(files[0].url, 432).then(function (thumb) {
             return thumb && T.history.add({ ts: Date.now(), thumb: thumb, title: s.title, multi: files.length > 1, source: 'export' });
           }).then(refreshHistory);

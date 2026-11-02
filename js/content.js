@@ -27,6 +27,14 @@
       return clean(out);
     }
 
+    if (state.type === 'video') {
+      var vd = state.video;
+      out.push('🎬 ' + ty(c.hook || vd.title) + ' 🎬', '');
+      if (c.body) out.push(ty(c.body), '');
+      out.push('🎟️ Билеты без комиссии и выбор мест: ' + link);
+      return clean(out);
+    }
+
     if (state.type === 'change') {
       var ch = state.change, move = ch.kind === 'move';
       var name = ty((e.kind ? e.kind + ' ' : '') + '"' + e.title + '"');
@@ -62,6 +70,7 @@
   // Подсказка, что именно сократить, — по типу поста и слайду, который не поместился
   function overflowText(state, spec, fit) {
     var n = fit.over + ' px. ';
+    if (spec.layout === 'vtype') return 'Название не помещается на ' + n + 'Сократите его до 2–4 слов или возьмите другую типографику.';
     if (spec.layout === 'digest') return 'Подборка не помещается на ' + n + 'Уберите одно событие или сократите названия и площадки.';
     if (spec.layout === 'change') return 'Текст не помещается на ' + n + 'Сократите текст про билеты или название площадки.';
     if (spec.layout === 'album' && fit.overSlide === 1) return 'Слайд деталей не помещается на ' + n + 'Сократите подводку или название.';
@@ -84,7 +93,7 @@
 
     if (fit && fit.over) add('error', overflowText(state, spec, fit));
     if (!String(spec.title || '').trim()) add('error', 'Нет названия.');
-    if (state.type !== 'digest' && !e.date) add('error', 'Нет даты события.');
+    if (state.type !== 'digest' && state.type !== 'video' && !e.date) add('error', 'Нет даты события.');
     if (state.type === 'digest') {
       var ph = state.digest.items.filter(function (it) { return !it.title.trim() || it.title.trim() === T.PLACEHOLDER_TITLE || it.venue.trim() === 'Площадка'; }).length;
       if (ph) add('error', 'В подборке остались строки-примеры: ' + ph + '. Заполните или удалите их.');
@@ -108,8 +117,23 @@
       }
     }
 
-    var titleLen = String(state.type === 'digest' ? state.digest.title : e.title).length;
-    if (titleLen > 32) add('warn', 'Длинное название: ' + titleLen + ' ' + T.plural(titleLen, ['знак', 'знака', 'знаков']) + '. На картинке лучше коротко, подробности — в подводке.');
+    var titleLen = String(state.type === 'digest' ? state.digest.title : state.type === 'video' ? state.video.title : e.title).length;
+    if (state.type === 'video' && titleLen > 28) add('warn', 'Название обложки — ' + titleLen + ' ' + T.plural(titleLen, ['знак', 'знака', 'знаков']) + '. На сетке профиля читаются 2–4 слова, не больше 28 знаков.');
+    else if (titleLen > 32) add('warn', 'Длинное название: ' + titleLen + ' ' + T.plural(titleLen, ['знак', 'знака', 'знаков']) + '. На картинке лучше коротко, подробности — в подводке.');
+    // цифры и даты: дата цифрами через точку, ведущий ноль и заглавные — на афише не читаются
+    var numTexts = [spec.title, spec.subline, spec.kind].concat((spec.items || []).map(function (i) { return i.title; }));
+    if (numTexts.some(function (t) { return /(^|[^\d])\d{1,2}[.\/]\d{1,2}([.\/]\d{2,4})?([^\d]|$)/.test(t || ''); })) {
+      add('warn', 'Дата цифрами через точку («02.11–16.11») на картинке читается тяжело. Пишите словами: «2–16 ноября».');
+    }
+    if (numTexts.some(function (t) { return /(^|[^\d])0\d(\s|\u00A0)+[а-яё]{3,}/i.test(t || ''); })) {
+      add('warn', 'Ведущий ноль в дате («02 ноября»). Пишите «2 ноября».');
+    }
+    if ([spec.title].concat((spec.items || []).map(function (i) { return i.title; })).some(function (t) {
+      var letters = String(t || '').replace(/[^A-Za-zА-Яа-яЁё]/g, ''); return letters.length >= 4 && letters === letters.toUpperCase();
+    }) && !spec.caps) add('warn', 'Название набрано заглавными. Названия пишутся обычным регистром — это читается быстрее.');
+    if (spec.titleFont === 'cormorant' && (spec.layout === 'digest' || spec.layout === 'vtype' || spec.layout === 'type')) {
+      add('info', 'Cormorant тонкий: на мелкой сетке ленты засечки теряются. Для подборок и обложек надёжнее Forum.');
+    }
     if (spec.caps) add('warn', 'Название капсом. По правилу 14.3 названия событий пишутся обычным регистром.');
     var texts = [spec.kind, spec.title, spec.subline, spec.layout === 'album' ? spec.detailsLead : ''].concat((spec.items || []).map(function (i) { return i.title; }));
     if (texts.some(T.hasEmoji)) add('warn', 'Эмодзи на картинке. Им место в тексте поста, не на холсте.');
@@ -125,14 +149,15 @@
       add('warn', 'Яркое свечение спорит с афишей. С картинкой — «Рампа» или без свечения.');
     }
     if ((spec.layout === 'change' || spec.layout === 'digest') && spec.slides[0].fx !== 'none') add('info', 'У служебных постов и подборки свечения нет по стандарту — оно отвлекает от дат.');
-    if (state.type !== 'digest' && e.date && e.date < T.todayIso()) add('warn', 'Дата события уже прошла.');
+    if (state.type !== 'digest' && state.type !== 'video' && e.date && e.date < T.todayIso()) add('warn', 'Дата события уже прошла.');
     if (state.type === 'digest' && state.digest.items.some(function (it) { return it.date && it.date < T.todayIso(); })) add('warn', 'В подборке есть прошедшая дата.');
-    if (!e.link) add('warn', 'Нет ссылки на билеты — в тексте поста останется [ссылка].');
+    if (state.type !== 'video' && !e.link) add('warn', 'Нет ссылки на билеты — в тексте поста останется [ссылка].');
     var cap = T.captionText(state);
     if (cap.length > 1024) add('warn', 'Текст поста — ' + cap.length + ' ' + T.plural(cap.length, ['знак', 'знака', 'знаков']) + '. Telegram прикрепляет к картинке до 1024, длиннее — уйдёт отдельным сообщением.');
     if (state.type === 'change' && !state.change.note) add('info', 'В посте типовой текст про билеты. Сверьте его с правилами возврата.');
-    if (fit && fit.lines > 2) add('warn', 'Название не встаёт в две строки даже уменьшенным. Сократите его — подробности в текст поста.');
-    else if (fit && !fit.over && fit.size < fit.start) add('info', 'Название уменьшено до ' + fit.px + ' px, чтобы встать в две строки и в поля.');
+    var maxLines = spec.maxLines || 2, linesWord = maxLines === 2 ? 'две строки' : maxLines === 3 ? 'три строки' : maxLines + ' строк';
+    if (fit && fit.lines > maxLines) add('warn', 'Название не встаёт в ' + linesWord + ' даже уменьшенным. Сократите его — подробности в текст поста.');
+    else if (fit && !fit.over && fit.size < fit.start) add('info', 'Название уменьшено до ' + fit.px + ' px, чтобы встать в ' + linesWord + ' и в поля.');
     if (!out.some(function (c) { return c.level === 'error' || c.level === 'warn'; })) out.unshift({ level: 'ok', text: 'Всё по стандарту.' });
     return out;
   };

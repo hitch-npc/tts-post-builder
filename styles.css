@@ -287,7 +287,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .g-lead { margin: 16px 0 0; max-width: 680px; font-size: 15px; line-height: 1.75; color: var(--n200); }
 .g-rules { margin: 24px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.6; color: var(--n200); max-width: 680px; }
 .g-rules b { color: var(--n100); font-weight: 600; }
-.g-toc { margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 24px; }
+.g-toc { margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 6px 24px; }
 .g-toc a { color: var(--n300); font-size: 13px; line-height: 1.5; text-decoration: none; border-bottom: 1px solid transparent; justify-self: start; }
 .g-toc a:hover { color: var(--n100); border-bottom-color: var(--n700); }
 .g-section { padding: 40px 0; border-bottom: 1px solid var(--n800); scroll-margin-top: 72px; }
@@ -320,3 +320,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .g-view-tg, .g-view-story { grid-template-columns: 1fr; }
   .g-table th { width: 96px; }
 }
+
+/* варианты типографики обложки видео */
+.g-vars { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 28px 24px; }
+.g-var { margin: 0; min-width: 0; }
+.g-var-row { display: flex; align-items: flex-end; gap: 14px; }
+.g-var-row .pv-crop { flex: none; box-shadow: 0 12px 32px var(--shadow-color); }
+.g-var figcaption { margin-top: 12px; font-size: 12px; line-height: 1.5; color: var(--n300); }
+.g-var figcaption b { display: block; margin-bottom: 4px; font-size: 10px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--n100); }

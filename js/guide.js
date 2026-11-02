@@ -35,6 +35,10 @@
 
   /* ── правки «Не так», которых конструктор не допускает ── */
   var tweaks = {
+    // как было до Forum: цифры и даты в Cormorant набираются старостильными
+    oldNums: function (p) {
+      p.style.setProperty('--smm-f-num', "'Cormorant Garamond', serif");
+    },
     colors: function (p) {
       var m = p.querySelector('.smm-mark');
       if (m) m.style.cssText += ';background:#FB923C;color:#FFFFFF';
@@ -62,6 +66,30 @@
   var BAD_CAPTION = 'МЁРТВЫЕ ДУШИ!!! 🔥🔥🔥 СПЕШИТЕ!!! Евгений Миронов и Юрий Башмет на одной сцене в спектакле-концерте по поэме Гоголя с музыкой Шнитке, а также Мария Смольникова и оркестр Новая Россия, режиссер Мария Брусникина, 29.04 в 19.00 в Доме музыки, билеты от 3000 руб по ссылке, торопитесь, места разлетаются!!! 🎭🎭🎭';
   var BAD_TEXT = 'Спектакль-концерт "Мёртвые души" - Гоголь и Шнитке в одном вечере. Начало в 19:00, билеты от 3000 ₽, 10-12 ряды партера...';
 
+  // Афиша на ближайшие две недели — тот самый пример, который попал в ленту с цифрами через точку
+  var AFISHA = [
+    { title: 'Фрида', date: '2026-11-02', time: '19:00', venue: 'Театр на Таганке', price: '', link: '', image: { ref: 'example', x: 50, y: 20, zoom: 1 } },
+    { title: 'Психопаты', date: '2026-11-09', time: '19:00', venue: 'Театр на Таганке', price: '', link: '', image: { ref: 'example', x: 20, y: 50, zoom: 1 } },
+    { title: 'Дракула', date: '2026-11-16', time: '19:00', venue: 'Театр Ермоловой', price: '', link: '', image: { ref: 'example', x: 80, y: 60, zoom: 1 } }
+  ];
+  function afisha(title, mut) {
+    return base(function (s) {
+      s.type = 'digest'; s.theme = 'dark'; s.digest.title = title; s.digest.items = T.clone(AFISHA);
+      if (mut) mut(s);
+    });
+  }
+  // шесть обложек разных типов — как их видит лента, когда они стоят рядом
+  function sixCovers(font) {
+    return [
+      base(function (s) { s.adv.titleFont = font; }),
+      base(function (s) { s.type = 'status'; s.status = 'few'; s.layout = 'band'; s.adv.titleFont = font; }),
+      afisha('Афиша 2–16 ноября', function (s) { s.theme = 'light'; s.adv.titleFont = font; }),
+      base(function (s) { s.type = 'video'; s.format = 'story'; s.adv.titleFont = font; }),
+      base(function (s) { s.layout = 'type'; s.theme = 'dark'; s.adv.titleFont = font; }),
+      base(function (s) { s.type = 'change'; s.adv.titleFont = font; })
+    ].map(function (st) { if (font === 'cormorant') st.adv.density = 0; return st; });
+  }
+
   /* ── пары ── */
   var EX = [
     { id: 'overload', title: 'Не перегружайте картинку',
@@ -76,6 +104,18 @@
       why: 'Капс читается медленнее и выглядит как крик. По правилу 14.3 названия событий пишутся обычным регистром, капс — только по решению владельца.',
       bad: function () { return base(function (s) { s.adv.titleCaps = true; }); },
       good: function () { return base(); } },
+    { id: 'digits', title: 'Не пишите даты цифрами через точку',
+      why: '«02.11–16.11» в Cormorant превращается в «ıı.ıı»: цифры у него по умолчанию старостильные — единица похожа на «I», «11» на две палочки, ноль на «o». На ленте это не прочитать. Даты пишутся словами («2–16 ноября», без ведущего нуля), а цифры — только в Forum: прописные, одной высоты, штрих плотный. Название — обычным регистром, не «АФИША».',
+      bad: function () { return afisha('АФИША (02.11–16.11)', function (s) { s.adv.titleFont = 'cormorant'; s.adv.titleCaps = true; s.adv.rawNums = true; s.adv.density = 0; }); }, badTweak: tweaks.oldNums,
+      good: function () { return afisha('Афиша 2–16 ноября'); } },
+    { id: 'thin', title: 'Не набирайте мелкое тонкой антиквой', view: 'grid',
+      why: 'В ленте и сетке профиля обложка размером с ноготь. У Cormorant тонкие засечки и волосные линии — они пропадают, и название превращается в серую полосу. Forum плотнее и ровнее, а на обложках видео и в подборках есть ещё плотность начертания (в расширенном интерфейсе: «Плотная», «Жирная»).',
+      bad: function () { return sixCovers('cormorant'); },
+      good: function () { return sixCovers('forum'); } },
+    { id: 'video', title: 'Не мельчите на обложке видео', view: 'tile',
+      why: 'Обложка видео — это одно слово-два, прочитанные за полсекунды. Название берите короче и набирайте во всю ширину: 2–4 слова, 150–200 px. Рубрика — надзаголовком, подробности — в описании ролика.',
+      bad: function () { return base(function (s) { s.type = 'video'; s.format = 'story'; s.adv.titleFont = 'cormorant'; s.adv.density = 0; s.adv.titleSize = 76; s.video.title = 'Как собирают «Мёртвые души»: репетиция'; s.video.line = 'Закулисье · репетиция · 2 минуты · Дом музыки'; }); },
+      good: function () { return base(function (s) { s.type = 'video'; s.format = 'story'; s.theme = 'dark'; }); } },
     { id: 'long-title', title: 'Не растягивайте название на три строки', raw: true,
       why: 'Три строки названия съедают картинку и ломают поля. На холсте — имя события, подробности — в текст поста. Конструктор сам уменьшит название до двух строк, но короткое всегда читается лучше.',
       bad: function () { return base(function (s) { s.event.title = 'Мёртвые души: Гоголь, Шнитке и оркестр «Новая Россия»'; s.adv.titleSize = 118; }); },
@@ -188,7 +228,7 @@
 
   function build() {
     $('toc').innerHTML = EX.map(function (ex, i) { return '<a href="#' + ex.id + '">' + (i + 1) + '. ' + esc(ex.title) + '</a>'; }).join('') +
-      '<a href="#standard">Стандарт конструктора</a>';
+      '<a href="#cover-type">Типографика обложек видео</a><a href="#standard">Стандарт конструктора</a>';
     $('guideList').innerHTML = EX.map(function (ex, i) {
       return '<section class="g-section" id="' + ex.id + '">' +
         '<h3 class="g-title"><span class="step">' + (i + 1) + '</span>' + esc(ex.title) + '</h3>' +
@@ -197,13 +237,34 @@
           '<figure class="g-fig"><figcaption class="g-bad">Не так</figcaption><div class="g-cell" data-ex="' + i + '" data-kind="bad"></div></figure>' +
           '<figure class="g-fig"><figcaption class="g-good">Так</figcaption><div class="g-cell" data-ex="' + i + '" data-kind="good"></div></figure>' +
         '</div></section>';
-    }).join('');
+    }).join('') + variants();
     paint();
   }
+  /* ── варианты типографики обложки видео ── */
+  function variants() {
+    var out = '<section class="g-section" id="cover-type"><h3 class="g-title">Типографика обложки видео: пять вариантов</h3>' +
+      '<p class="g-why">Один шрифт — Forum, одна строка рубрики, ничего лишнего; различаются только жесты. Рядом с каждым вариантом он же в размере сетки профиля (обложка около 120 px шириной) — читается ли название. ' +
+      'В конструкторе: «Обложка видео» → «Только заголовок» → «Типографика».</p><div class="g-vars">';
+    Object.keys(T.TYPE_STYLES).forEach(function (k, i) {
+      out += '<figure class="g-var"><div class="g-var-row" data-var="' + k + '"></div>' +
+        '<figcaption><b>' + (i + 1) + '. ' + esc(T.TYPE_STYLES[k].name) + '</b>' + esc(T.TYPE_STYLES[k].hint) + '</figcaption></figure>';
+    });
+    return out + '</div></section>';
+  }
+  function paintVariants() {
+    document.querySelectorAll('[data-var]').forEach(function (row, i) {
+      var k = row.getAttribute('data-var'), themes = [['dark', 'blobs', 'cw'], ['light', 'ribbon', 'cv'], ['dark', 'arch', 'cg'], ['light', 'curtain', 'cw'], ['dark', 'rays', 'cwg']];
+      var th = themes[i % themes.length];
+      var r = slideHtml(base(function (s) { s.type = 'video'; s.format = 'story'; s.theme = th[0]; s.glow = th[1]; s.adv.mix = th[2]; s.video.style = k; }), 0);
+      row.innerHTML = scaledBox(r.html, 210, r.spec.H, 280) + '<div class="g-var-small">' + scaledBox(r.html, 116, r.spec.H, 155) + '</div>';
+    });
+  }
+
   function paint() {
     document.querySelectorAll('.g-cell').forEach(function (cell) {
       renderShot(EX[+cell.getAttribute('data-ex')], cell.getAttribute('data-kind'), cell);
     });
+    paintVariants();
   }
 
   // уменьшенная копия примера — для пары «маленькая картинка»

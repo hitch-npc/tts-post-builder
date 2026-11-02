@@ -8,6 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%272%27 fill=%27%230D0D0D%27/%3E%3Cpath d=%27M16 10c6 0 11 6 11 6s-5 6-11 6S5 16 5 16s5-6 11-6Z%27 fill=%27%23D6D6D2%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%273%27 fill=%27%230D0D0D%27/%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="ds/ds-smm.css">
+<link rel="stylesheet" href="canvas-plus.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -35,6 +36,7 @@
         <button class="chip" type="button" data-value="status">Статус продаж</button>
         <button class="chip" type="button" data-value="change">Перенос или отмена</button>
         <button class="chip" type="button" data-value="digest">Подборка</button>
+        <button class="chip" type="button" data-value="video">Обложка видео</button>
       </div>
       <div class="field sub" data-when="type:status"><span class="label">Статус</span>
         <div class="chips" data-chips="status">
@@ -62,13 +64,19 @@
           <button class="chip" type="button" data-value="type">Без картинки</button>
         </div>
       </div>
-      <div class="field" data-when="layout:type"><span class="label">Свечение</span>
+      <div class="field" data-when="layout:type,vtype"><span class="label">Свечение</span>
         <div class="chips" data-chips="glow">
           <button class="chip" type="button" data-value="beam">Луч</button>
           <button class="chip" type="button" data-value="depth">Глубина</button>
           <button class="chip" type="button" data-value="halo">Ореол</button>
+          <button class="chip" type="button" data-value="blobs">Пятна</button>
+          <button class="chip" type="button" data-value="rays">Лучи</button>
+          <button class="chip" type="button" data-value="orbit">Орбиты</button>
+          <button class="chip" type="button" data-value="arch">Арка</button>
+          <button class="chip" type="button" data-value="ribbon">Лента</button>
+          <button class="chip" type="button" data-value="curtain">Занавес</button>
         </div>
-        <p class="hint">Цвет свечения — от жанра. Один цвет на пост.</p>
+        <p class="hint">Цвет свечения — от жанра. В простом интерфейсе — один цвет на пост; смешать цвета можно в разделе «Дизайн».</p>
       </div>
       <div class="field"><span class="label">Формат</span>
         <div class="chips" data-chips="format">
@@ -83,7 +91,7 @@
           <button class="chip" type="button" data-value="dark">Тёмная</button>
         </div>
       </div>
-      <div class="field" data-when="type:announce,status,digest"><span class="label">Жанр — от него цвет свечения</span>
+      <div class="field" data-when="type:announce,status,digest,video"><span class="label">Жанр — от него цвет свечения</span>
         <div class="chips" data-chips="genre">
           <button class="chip" type="button" data-value="theatre">Театр</button>
           <button class="chip" type="button" data-value="classic">Классика</button>
@@ -144,6 +152,38 @@
         <input class="input" type="url" id="dLink" data-bind="event.link" placeholder="https://"></div>
     </section>
 
+    <section class="sec" data-when="type:video">
+      <h2 class="sec-title"><span class="step">3</span>Видео</h2>
+      <div class="field"><span class="label">Макет обложки</span>
+        <div class="chips" data-chips="video.layout">
+          <button class="chip" type="button" data-value="type">Только заголовок</button>
+          <button class="chip" type="button" data-value="band">Кадр сверху</button>
+        </div>
+      </div>
+      <div class="field" data-when="layout:vtype"><span class="label">Типографика</span>
+        <div class="chips" data-chips="video.style">
+          <button class="chip" type="button" data-value="poster">Плакат</button>
+          <button class="chip" type="button" data-value="stack">Колонка</button>
+          <button class="chip" type="button" data-value="contrast">Контраст</button>
+          <button class="chip" type="button" data-value="center">Центр</button>
+          <button class="chip" type="button" data-value="numeral">Номер</button>
+        </div>
+        <p class="hint" id="styleHint"></p>
+      </div>
+      <div class="field"><label class="label" for="vKind">Надзаголовок — рубрика</label>
+        <input class="input" id="vKind" data-bind="video.kicker" maxlength="32" placeholder="Закулисье"></div>
+      <div class="field"><label class="label" for="vTitle">Название — о чём видео</label>
+        <input class="input" id="vTitle" data-bind="video.title" maxlength="48" placeholder="Как собирают «Мёртвые души»">
+        <span class="count" data-count="video.title" data-max="48"></span>
+        <p class="hint">Короче — крупнее: на сетке профиля обложка размером с ноготь. Лучше 2–4 слова.</p></div>
+      <div class="field" data-when="style:numeral layout:vtype"><label class="label" for="vNum">Номер выпуска</label>
+        <input class="input" id="vNum" data-bind="video.num" maxlength="3" placeholder="3"></div>
+      <div class="field"><label class="label" for="vLine">Строка — одна, коротко</label>
+        <input class="input" id="vLine" data-bind="video.line" maxlength="40" placeholder="Репетиция · 2 мин"></div>
+      <div class="field"><label class="label" for="vLink">Ссылка на билеты</label>
+        <input class="input" type="url" id="vLink" data-bind="event.link" placeholder="https://"></div>
+    </section>
+
     <section class="sec" data-when="layout:frame,band,album">
       <h2 class="sec-title"><span class="step">4</span>Картинка</h2>
       <input type="file" id="imageFile" accept="image/*" hidden>
@@ -173,6 +213,22 @@
         <div class="range" data-when="titleSize:manual"><input type="range" id="titleSize" min="72" max="160" step="2" data-bind="adv.titleSize" data-num aria-label="Размер названия, px"><output data-out="adv.titleSize"></output></div>
         <p class="hint">Авто: 118 px по шкале SMM, название не больше двух строк.</p>
       </div>
+      <div class="field"><span class="label">Шрифт названий и дат</span>
+        <div class="chips" data-chips="adv.titleFont">
+          <button class="chip" type="button" data-value="forum">Forum</button>
+          <button class="chip" type="button" data-value="cormorant">Cormorant</button>
+        </div>
+        <p class="hint">Forum плотнее и читается с мелкой сетки. Cormorant тонкий: на ленте его засечки теряются. Цифры в любом случае прописные — старостильные («11» → «ıı») запрещены.</p>
+      </div>
+      <div class="field"><span class="label">Плотность начертания</span>
+        <div class="chips" data-chips="adv.density" data-num>
+          <button class="chip" type="button" data-value="-1">Авто</button>
+          <button class="chip" type="button" data-value="0">Обычная</button>
+          <button class="chip" type="button" data-value="1">Плотная</button>
+          <button class="chip" type="button" data-value="2">Жирная</button>
+        </div>
+        <p class="hint">Авто: обложка видео и подборка — плотная, остальное — обычная.</p>
+      </div>
       <div class="field"><label class="check"><input type="checkbox" data-bind="adv.titleCaps"> Название капсом</label>
         <p class="hint">По правилу 14.3 названия событий пишутся обычным регистром. Капс — только по решению владельца.</p></div>
       <div class="field"><span class="label">Свечение</span>
@@ -183,9 +239,29 @@
           <button class="chip" type="button" data-value="beam">Луч</button>
           <button class="chip" type="button" data-value="depth">Глубина</button>
           <button class="chip" type="button" data-value="halo">Ореол</button>
+          <button class="chip" type="button" data-value="blobs">Пятна</button>
+          <button class="chip" type="button" data-value="rays">Лучи</button>
+          <button class="chip" type="button" data-value="orbit">Орбиты</button>
+          <button class="chip" type="button" data-value="arch">Арка</button>
+          <button class="chip" type="button" data-value="ribbon">Лента</button>
+          <button class="chip" type="button" data-value="curtain">Занавес</button>
         </div>
         <p class="hint">Авто: «Рампа» на постах с картинкой, «Глубина» на слайде деталей, выбранное свечение без картинки, у переноса, отмены и подборки — нет.</p>
       </div>
+      <div class="field"><span class="label">Цвета свечения</span>
+        <div class="chips" data-chips="adv.mix">
+          <button class="chip" type="button" data-value="genre">Один — жанра</button>
+          <button class="chip" type="button" data-value="cw">Синий + тёплый</button>
+          <button class="chip" type="button" data-value="cg">Синий + зелёный</button>
+          <button class="chip" type="button" data-value="wg">Тёплый + зелёный</button>
+          <button class="chip" type="button" data-value="cv">Синий + фиолет</button>
+          <button class="chip" type="button" data-value="cwg">Три цвета</button>
+          <button class="chip" type="button" data-value="mono">Серебро</button>
+        </div>
+        <p class="hint">Стандарт дизайн-системы — один цвет жанра. Смешение — для обложек и постов без картинки: фон «Пятна», «Лучи», «Арка», «Лента», «Занавес» раскрываются только с двумя-тремя цветами.</p>
+      </div>
+      <div class="field"><label class="check"><input type="checkbox" data-bind="adv.grain"> Зерно поверх фона</label>
+        <p class="hint">Мягкая плёнка: убирает ступеньки градиента и оживляет тёмную тему.</p></div>
       <div class="field"><span class="label">Поля</span>
         <div class="chips" data-chips="adv.margins">
           <button class="chip" type="button" data-value="wide">112 px</button>
@@ -200,7 +276,7 @@
           <button class="chip" type="button" data-value="light">Светлый</button>
         </div>
       </div>
-      <div class="field" data-when="layout:frame,band,album,type"><label class="label" for="aSub">Строка под названием</label>
+      <div class="field" data-when="type:announce,status"><label class="label" for="aSub">Строка под названием</label>
         <input class="input" id="aSub" data-bind="adv.subline" maxlength="60" data-auto-placeholder="subline">
         <p class="hint">Пусто — дата, время и площадка. Одна строка, без города и цены.</p></div>
       <div class="field" data-when="layout:album"><label class="label" for="aLead">Фраза на слайде деталей</label>
@@ -209,7 +285,7 @@
       <div class="field" data-when="layout:album"><label class="check"><input type="checkbox" id="customRows"> Своя таблица на слайде деталей</label>
         <div id="rowsList"></div>
         <button class="btn btn-ghost btn-full" type="button" id="addRow" data-when="customRows:yes">Добавить строку</button></div>
-      <div class="field" data-when="layout:frame,band,type,change,digest"><label class="label" for="aBars">Палочки слайдов</label>
+      <div class="field" data-when="layout:frame,band,type,change,digest,vtype"><label class="label" for="aBars">Палочки слайдов</label>
         <select class="select" id="aBars" data-bind="adv.slides">
           <option value="auto">Нет</option><option value="1/2">1 из 2</option><option value="2/2">2 из 2</option>
           <option value="1/3">1 из 3</option><option value="2/3">2 из 3</option><option value="3/3">3 из 3</option>
@@ -223,7 +299,7 @@
 
     <section class="sec">
       <h2 class="sec-title"><span class="step" data-step-caption>5</span>Текст поста</h2>
-      <div data-when="type:announce,status">
+      <div data-when="type:announce,status,video">
         <div class="field"><label class="label" for="cHook">Крючок — первая строка</label>
           <input class="input" id="cHook" data-bind="caption.hook" maxlength="90"></div>
         <div class="field"><label class="label" for="cBody">О чём</label>
