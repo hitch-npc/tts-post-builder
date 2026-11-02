@@ -57,6 +57,10 @@
     }
     if (type === 'status') s.mark = T.STATUSES[state.status].name;
     if (type === 'change') s.mark = T.CHANGES[state.change.kind].name;
+    // цвет метки: инверсия по умолчанию; «как рисунок» берёт цвет рисунка или жанра; красный — только у переноса и отмены
+    var mc = state.markColor || 'invert';
+    if (mc === 'red' && type !== 'change') mc = 'invert';
+    s.markColor = mc;
 
     // слайд деталей альбома: одна фраза и пункты в одну строку
     var autoRows = [
@@ -123,6 +127,10 @@
       if (pick === 'red' && type !== 'change') pick = '';   // красный — сигнал тревоги, только у переноса и отмены
       s.art = { kind: artKind, seed: state.artSeed || 1, hue: pick || s.hue,
         calm: layout === 'digest' ? 'list' : layout === 'vtype' && s.typeStyle === 'center' ? 'mid' : 'low' };
+    }
+    if (s.markColor === 'art') {
+      var mh = (s.art && s.art.hue) || s.hue;
+      s.markColor = { cool: 'cobalt', silver: 'invert' }[mh] || mh;
     }
     function fxFor(kind) {
       if (s.art && ART_LAYOUTS[kind]) return 'none';
@@ -193,7 +201,7 @@
     return ['smm-canvas', 'smm-canvas--' + s.format, s.theme === 'light' ? 'smm-canvas--light' : '',
       s.hue !== 'cool' ? 'smm-canvas--' + s.hue : '', s.wide ? '' : 'smm-canvas--tight',
       'bx-tf-' + s.titleFont, s.density ? 'bx-d' + s.density : '', s.field !== 'auto' ? 'bx-field-' + s.field : '',
-      s.grain && !s.art ? 'bx-grain' : '', layout].filter(Boolean).join(' ');
+      s.grain && !s.art ? 'bx-grain' : '', s.markColor && s.markColor !== 'invert' ? 'bx-mark-' + s.markColor : '', layout].filter(Boolean).join(' ');
   }
   // слой рисунка: картинка из шейдера, класс smm-fx — чтобы лечь под текст, как свечение
   function art(s) {

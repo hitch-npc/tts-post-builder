@@ -8,6 +8,7 @@
   var env = { src: function () { return 'assets/example.jpg'; }, tone: function () { return 'dark'; } };
   var KINDS = Object.keys(T.ARTS);
   var HUES = ['cobalt', 'cool', 'violet', 'teal', 'green', 'gold', 'warm', 'silver'];   // красный — только у переноса и отмены
+  var MARKS = { invert: 'инверсия', art: 'как рисунок', cobalt: 'кобальт', violet: 'фиолетовый', teal: 'бирюза', green: 'зелёный', gold: 'золото', warm: 'оранжевый', red: 'красный' };
   var FIELD = { auto: 'По теме', paper: 'Бумага', stone: 'Камень', graphite: 'Графит', night: 'Ночь', cobalt: 'Кобальт' };
 
   function st(o) {
@@ -19,12 +20,13 @@
     if (o.change) s.change.kind = o.change;
     if (o.style) { s.video.style = o.style; s.video.layout = 'type'; }
     if (o.genre) s.genre = o.genre;
+    s.markColor = o.mark || 'invert';
     return s;
   }
   function label(o) {
-    var t = { announce: 'Анонс', change: o.change === 'cancel' ? 'Отмена' : 'Перенос', digest: 'Подборка', video: 'Обложка видео' }[o.type || 'announce'];
+    var t = { status: 'Статус продаж', announce: 'Анонс', change: o.change === 'cancel' ? 'Отмена' : 'Перенос', digest: 'Подборка', video: 'Обложка видео' }[o.type || 'announce'];
     return [t, o.theme === 'light' ? 'светлая' : 'тёмная', 'фон ' + FIELD[o.field || 'auto'].toLowerCase(),
-      (T.ART_HUES[o.hue || 'auto'] || '').toLowerCase(), '«' + (T.ARTS[o.art] || 'без рисунка') + '»'].join(' · ');
+      (T.ART_HUES[o.hue || 'auto'] || '').toLowerCase(), '«' + (T.ARTS[o.art] || 'без рисунка') + '»'].concat(o.mark ? ['метка: ' + (MARKS[o.mark] || o.mark)] : []).join(' · ');
   }
 
   // наборы: тёмный фон × цвета бренда — главный вопрос; затем светлая тема и типы постов
@@ -44,7 +46,16 @@
     { type: 'video', style: 'poster', art: 'moon' }, { type: 'video', style: 'stack', art: 'chrome', hue: 'gold' },
     { type: 'video', style: 'center', art: 'rays', hue: 'teal' }, { type: 'video', style: 'numeral', art: 'grain', hue: 'cobalt' }
   ];
+  var d = [
+    { type: 'change', change: 'move', art: 'silk', mark: 'invert' }, { type: 'change', change: 'move', art: 'silk', mark: 'art' },
+    { type: 'change', change: 'cancel', art: 'smoke', mark: 'art' }, { type: 'change', change: 'move', art: 'glass', theme: 'light', mark: 'art' },
+    { type: 'status', art: 'rays', mark: 'cobalt' }, { type: 'status', art: 'rays', mark: 'violet', hue: 'violet' },
+    { type: 'status', art: 'moon', mark: 'teal', hue: 'teal' }, { type: 'status', art: 'contour', mark: 'green', genre: 'musical' },
+    { type: 'status', art: 'steps', mark: 'gold', hue: 'gold' }, { type: 'status', art: 'glass', mark: 'warm', genre: 'opera' },
+    { type: 'status', art: 'silk', mark: 'cobalt', theme: 'light' }, { type: 'status', layout: 'frame', mark: 'cobalt' }
+  ];
   SETS.push({ id: 'C', title: 'Типы постов', note: 'Перенос и отмена — свой цвет по смыслу; подборка и обложки видео — с цветами бренда.', items: c });
+  SETS.push({ id: 'D', title: 'Цвет метки', note: 'Метка над названием: инверсия, в цвет рисунка или цвет бренда.', items: d });
 
   var votes = {};
   try { votes = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { votes = {}; }

@@ -189,3 +189,12 @@
 /* отмена — красный тон холста (поле «Ночь» и свет берут его из --smm-hue) */
 .smm-canvas--red { --smm-hue: #4A0A0A; }
 .smm-canvas--light.smm-canvas--red { --smm-hue: #FCA5A5; }
+
+/* метка статуса в цвете: фон — цвет бренда, текст — белый или чернила по контрасту */
+.smm-canvas.bx-mark-cobalt .smm-mark { background: #0047FF; color: #FFFFFF; }
+.smm-canvas.bx-mark-violet .smm-mark { background: #7A4DFF; color: #FFFFFF; }
+.smm-canvas.bx-mark-teal   .smm-mark { background: #2BA7B8; color: #0D0D0D; }
+.smm-canvas.bx-mark-green  .smm-mark { background: #22C55E; color: #0D0D0D; }
+.smm-canvas.bx-mark-gold   .smm-mark { background: #C9975A; color: #0D0D0D; }
+.smm-canvas.bx-mark-warm   .smm-mark { background: #FB923C; color: #0D0D0D; }
+.smm-canvas.bx-mark-red    .smm-mark { background: #DC2626; color: #FFFFFF; }
