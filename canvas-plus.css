@@ -234,3 +234,6 @@
 .smm-canvas.bx-mark-orange  .smm-mark { background: var(--tag-o-fg); color: var(--mark-ink); box-shadow: none; }
 .smm-canvas.bx-mark-red     .smm-mark { background: var(--tag-r-fg); color: var(--mark-ink); box-shadow: none; }
 .smm-canvas.bx-mark-default .smm-mark { background: var(--tag-d-fg); color: var(--mark-ink); box-shadow: none; }
+
+/* Выходные в датах: красное подчёркивание цветом тега ядра */
+.smm-canvas .bx-we { text-decoration: underline; text-decoration-color: var(--tag-r-fg); text-decoration-thickness: .1em; text-underline-offset: .22em; text-decoration-skip-ink: none; }

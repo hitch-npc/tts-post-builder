@@ -76,7 +76,7 @@
     if (spec.layout === 'album' && fit.overSlide === 1) return 'Слайд деталей не помещается на ' + n + 'Сократите подводку или название.';
     var tips = [];
     if (String(state.event.title).length > 32) tips.push('сократите название');
-    if (String(spec.subline || '').length > 40) tips.push('сократите строку под названием');
+    if (T.plainText(spec.subline).length > 40) tips.push('сократите строку под названием');
     if (spec.wide) tips.push('включите узкие поля в режиме Advanced');
     if (spec.layout === 'frame') tips.push('или возьмите макет «Картинка полосой» — в нём больше места для текста');
     var t = tips.join(', ');

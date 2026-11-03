@@ -28,6 +28,8 @@
     var story = f === 'story';
     var price = fmt.price(e.price);
     var when = fmt.dayMonth(e.date) + (e.time ? ', ' + e.time : '');
+    // с днём недели — на холсте; зачёркнутая старая дата у переноса остаётся без него
+    var whenDow = [fmt.dayMonth(e.date), fmt.dow(e.date), e.time].filter(Boolean).join(', ');
 
     var s = {
       type: type, layout: layout, format: f, H: T.FORMATS[f].h,
@@ -37,7 +39,7 @@
       hue: type === 'change' ? (state.change.kind === 'cancel' ? 'red' : 'warm') : (T.GENRES[state.genre] || T.GENRES.other).hue,
       kind: ty(e.kind), title: ty(e.title), caps: !!a.titleCaps,
       titleSize: a.titleSize || 0,
-      line: [when, ty(e.venue)].filter(Boolean).join(' · '),
+      line: [whenDow, ty(e.venue)].filter(Boolean).join(' · '),
       age: e.age || '',
       image: { src: env && env.src ? env.src(e.image.ref) : '', x: e.image.x, y: e.image.y, zoom: e.image.zoom, ref: e.image.ref },
       imageSize: a.imageSize, logoTone: a.logoTone,
@@ -78,7 +80,7 @@
       s.change = {
         move: move,
         newDay: fmt.dayMonth(c.date),
-        sub: [c.time, ty(move && c.venue ? c.venue : e.venue), e.date ? 'вместо ' + fmt.dayMonth(e.date) : ''].filter(Boolean).join(' · '),
+        sub: [[fmt.dow(c.date), c.time].filter(Boolean).join(', '), ty(move && c.venue ? c.venue : e.venue), e.date ? 'вместо ' + fmt.dayMonth(e.date) : ''].filter(Boolean).join(' · '),
         was: when, venue: ty(e.venue),
         note: ty(c.note || T.CHANGES[c.kind].note)
       };
@@ -107,7 +109,7 @@
       s.items = d.items.map(function (it) {
         var im = it.image && it.image.ref ? it.image : null;
         return {
-          title: ty(it.title), day: fmt.dayMonth(it.date), time: it.time || '', venue: ty(it.venue),
+          title: ty(it.title), day: fmt.dayMonth(it.date), time: [fmt.dow(it.date), it.time].filter(Boolean).join(', '), venue: ty(it.venue),
           img: im ? { src: env && env.src ? env.src(im.ref) : '', x: im.x, y: im.y } : null
         };
       });

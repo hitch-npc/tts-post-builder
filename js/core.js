@@ -190,8 +190,11 @@
   T.esc = function (s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
+    }).replace(/\uE000/g, '<span class="bx-we">').replace(/\uE001/g, '</span>');
   };
+  // день недели на холсте: выходные помечены и рисуются с красным подчёркиванием (.bx-we)
+  T.WE_OPEN = '\uE000'; T.WE_CLOSE = '\uE001';
+  T.plainText = function (s) { return String(s || '').replace(/[\uE000\uE001]/g, ''); };
   T.br = function (s) { return T.esc(s).replace(/\n/g, '<br>'); };
   // Числа в названиях — в отдельном «прописном» начертании (.bx-n): в Cormorant цифры по умолчанию старостильные
   // («11» читается как «ıı», «1» как «I»), на афише так нельзя. Экранирует сам, поэтому принимает сырой текст.
@@ -254,6 +257,11 @@
     dayMonth: function (iso) { var d = T.parseDate(iso); return d ? d.getDate() + NB + MONTHS[d.getMonth()] : ''; },
     short: function (iso) { var d = T.parseDate(iso); return d ? d.getDate() + NB + MONTHS[d.getMonth()] + ', ' + DOW[d.getDay()] : ''; },
     long: function (iso) { var d = T.parseDate(iso); return d ? d.getDate() + NB + MONTHS[d.getMonth()] + ' ' + d.getFullYear() : ''; },
+    dow: function (iso) {
+      var d = T.parseDate(iso); if (!d) return '';
+      var w = DOW[d.getDay()];
+      return d.getDay() === 0 || d.getDay() === 6 ? T.WE_OPEN + w + T.WE_CLOSE : w;
+    },
     longDow: function (iso) { var d = T.parseDate(iso); return d ? d.getDate() + NB + MONTHS[d.getMonth()] + ' ' + d.getFullYear() + ', ' + DOW_FULL[d.getDay()] : ''; },
     dow: function (iso) { var d = T.parseDate(iso); return d ? DOW[d.getDay()] : ''; },
     dowFull: function (iso) { var d = T.parseDate(iso); return d ? DOW_FULL[d.getDay()] : ''; },
