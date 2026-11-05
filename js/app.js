@@ -363,8 +363,8 @@
       if (key === 'theme') state.field = 'auto';
       if (key === 'palette') applyPalette(v);
       if (key === 'theme' || key === 'field' || key === 'artHue') state.palette = matchPalette();
-      // обложка видео вертикальная — сразу 9:16
-      if (key === 'type' && v === 'video' && state.format === 'post') state.format = 'story';
+      // обложка видео — формата ленты Instagram, 4:5 (1080 × 1350)
+      if (key === 'type' && v === 'video' && state.format === 'story') state.format = 'post';
       update({ lists: false });
       return;
     }

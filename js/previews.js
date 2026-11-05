@@ -87,7 +87,7 @@
       '<div class="igg-grid" style="grid-template-columns:repeat(3,' + tw + 'px);gap:' + gap + 'px">' + tiles + '</div>' +
       '<div class="igg-tools"><button class="btn btn-ghost btn-sm" type="button" id="histAdd">Добавить прошлые посты</button>' +
         (ctx.history.length ? '<button class="btn btn-ghost btn-sm" type="button" id="histClear">Очистить</button>' : '') + '</div>' +
-      '<p class="pv-note">' + (ctx.video ? 'Обложка 9:16 в сетке видна серединой 3:4: верх и низ срезаются по 240 px. Название должно читаться при ширине обложки около 120 px. ' :
+      '<p class="pv-note">' + (ctx.video ? 'Название должно читаться при ширине обложки около 120 px: на сетке профиля она размером с ноготь. Сетка показывает середину в пропорции 3:4 — у 4:5 срезается по 34 px с боков. ' :
         'Сетка показывает середину поста в пропорции 3:4: у 4:5 срезается по 34 px с боков, у квадрата — по 135 px. ') +
         'Рядом — ваши прошлые выгрузки и добавленные картинки. Они хранятся только в этом браузере.</p>' +
     '</div>';
