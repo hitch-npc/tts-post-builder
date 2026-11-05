@@ -53,7 +53,7 @@
       maxLines: 2
     };
     if (type === 'video') {
-      s.kind = ty(v.kind); s.title = ty(v.title); s.age = '';
+      s.kind = ty(v.kicker); s.title = ty(v.title); s.age = '';
       s.line = ty(v.line);
       if (layout === 'vtype') s.maxLines = T.VT_LINES[s.typeStyle];
     }
@@ -303,6 +303,11 @@
     poster.querySelectorAll('[data-limit]').forEach(function (el) {
       var bottom = (el.getBoundingClientRect().bottom - top) / scale;
       worst = Math.max(worst, bottom - parseFloat(el.getAttribute('data-limit')));
+    });
+    // по ширине: самое длинное слово не должно выходить за правое поле (перенос внутри слова не делаем)
+    poster.querySelectorAll('[data-title]').forEach(function (el) {
+      var box = Math.min(el.clientWidth, el.parentElement ? el.parentElement.clientWidth : el.clientWidth);
+      worst = Math.max(worst, el.scrollWidth - box);
     });
     return Math.ceil(worst > 0.5 ? worst : 0);
   }
